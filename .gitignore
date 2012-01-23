@@ -1,0 +1,13 @@
+
+*.pyc
+*.pyo
+
+.idea/*
+
+jenkins_reports/*
+build/*
+example.db
+
+*.egg-info/*
+
+dist/*
