@@ -79,6 +79,7 @@ class AuthSigner(object):
     def get_signature(cls, private_key, base_url, payload=None):
         return cls(private_key).create_signature(base_url, payload)
 
+
     def create_signature(self, base_url, payload=None):
         """
         Creates unique signature for request.
@@ -91,12 +92,20 @@ class AuthSigner(object):
             to re-create the signature.
         """
         url = urlparse.urlparse(base_url)
-        url_to_sign = url.path + '?' + url.query
+
+        url_to_sign = url.path + '?' + self.remove_signature_from_querystring(url)
         encoded_payload = self._encode_payload(payload)
 
         decoded_key = base64.urlsafe_b64decode(self.private_key.encode('utf-8'))
         signature = hmac.new(decoded_key, url_to_sign + encoded_payload, hashlib.sha256)
         return base64.urlsafe_b64encode(signature.digest())
+
+    def remove_signature_from_querystring(self, url):
+        tmp = urlparse.parse_qs(url.query)
+        if constants.SIGNATURE_PARAM_NAME in tmp:
+            del tmp[constants.SIGNATURE_PARAM_NAME]
+        querystring = urllib.urlencode(tmp, True)
+        return querystring
 
     def _encode_payload(self, payload):
         """

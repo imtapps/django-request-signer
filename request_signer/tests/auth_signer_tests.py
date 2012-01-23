@@ -1,5 +1,5 @@
 from django.utils import unittest
-from request_signer import AuthSigner, signed_request, models
+from request_signer import AuthSigner, constants
 
 
 __all__ = ('AuthSignerTests', )
@@ -62,11 +62,14 @@ class AuthSignerTests(unittest.TestCase):
 
     def test_classmethod_generates_signature_excluding_signature_param_in_payload(self):
         private_key = 'CoVTr95Xv2Xlu4ZjPo2bWl7u4SnnAMAD7EFFBMS4Dy4='
-        base_url = 'http://www.apps-system.com/accounts/user/add/'
-        data = {'username': 'some tester', 'first_name': 'Mr. Test'}
-        signature = AuthSigner.get_signature(private_key, base_url, data)
-
         expected_signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+        base_url = 'http://www.apps-system.com/accounts/user/add/?'
+        base_url += constants.SIGNATURE_PARAM_NAME + "=" + expected_signature
+        data = {
+            'username': 'some tester',
+            'first_name': 'Mr. Test',
+        }
+        signature = AuthSigner.get_signature(private_key, base_url, data)
         self.assertEqual(expected_signature, signature)
 
     def test_signs_request_when_private_key_is_unicode(self):
