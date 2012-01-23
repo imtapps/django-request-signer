@@ -7,6 +7,8 @@ from django.utils import unittest
 from request_signer.client.generic import Request, Response, Client
 from request_signer.models import create_private_key
 
+__all__ = ('ClientTests', )
+
 class ClientTests(unittest.TestCase):
 
     def setUp(self):

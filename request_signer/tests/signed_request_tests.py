@@ -3,6 +3,8 @@ from django import test
 from django import http
 from request_signer import signed_request, models, constants
 
+__all__ = ('SignedRequestTests', )
+
 class SignedRequestTests(test.TestCase):
     """
     Tests for the signed_request decorator.

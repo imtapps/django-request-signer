@@ -3,6 +3,8 @@ import mock
 from django.utils import unittest
 from request_signer.client.generic import Request, HttpMethodNotAllowed
 
+__all__ = ('RequestTests', )
+
 class RequestTests(unittest.TestCase):
 
     def get_request(self, http_method, url="http://some.domain.com"):

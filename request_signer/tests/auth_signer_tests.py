@@ -2,6 +2,8 @@ from django.utils import unittest
 from request_signer import AuthSigner, signed_request, models
 
 
+__all__ = ('AuthSignerTests', )
+
 class AuthSignerTests(unittest.TestCase):
 
     def setUp(self):

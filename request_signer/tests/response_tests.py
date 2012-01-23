@@ -5,6 +5,8 @@ import mock
 from django.utils import unittest
 from request_signer.client.generic import  Response
 
+__all__ = ('ResponseTests', )
+
 class ResponseTests(unittest.TestCase):
 
     def setUp(self):
