@@ -114,6 +114,10 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+PROJECT_APPS = (
+    'request_signer',
+)
+
 INSTALLED_APPS = (
     'south',
     'django.contrib.auth',
@@ -122,9 +126,18 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'request_signer',
     'django.contrib.admin',
-)
+    'django_jenkins',
+) + PROJECT_APPS
+
+JENKINS_TASKS = (
+    'django_jenkins.tasks.django_tests',
+    'django_jenkins.tasks.run_pylint',
+    'django_jenkins.tasks.run_pep8',
+    'django_jenkins.tasks.run_pyflakes',
+    'django_jenkins.tasks.with_coverage',
+    )
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -148,3 +161,5 @@ LOGGING = {
         },
     }
 }
+
+PYLINT_RCFILE = join(parent, 'pylint.rc')

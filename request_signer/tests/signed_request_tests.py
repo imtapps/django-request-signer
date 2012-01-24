@@ -1,13 +1,13 @@
 import mock
 from django import test
 from django import http
-from request_signer import signed_request, models, constants
+from request_signer import signature_required, models, constants
 
 __all__ = ('SignedRequestTests', )
 
 class SignedRequestTests(test.TestCase):
     """
-    Tests for the signed_request decorator.
+    Tests for the signature_required decorator.
     """
 
     @property
@@ -25,7 +25,7 @@ class SignedRequestTests(test.TestCase):
             HTTP_X_APPS_AUTH_CLIENT_ID='apps-something',
         )
 
-        signed_view = signed_request(self.view)
+        signed_view = signature_required(self.view)
         response = signed_view(request)
         self.assertEqual(400, response.status_code)
 
@@ -34,7 +34,7 @@ class SignedRequestTests(test.TestCase):
             HTTP_X_APPS_AUTH_SIGNATURE='4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
         )
 
-        signed_view = signed_request(self.view)
+        signed_view = signature_required(self.view)
         response = signed_view(request)
         self.assertEqual(400, response.status_code)
 
@@ -47,7 +47,7 @@ class SignedRequestTests(test.TestCase):
             HTTP_X_APPS_AUTH_SIGNATURE='4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
             HTTP_X_APPS_AUTH_CLIENT_ID=client.client_id,
         )
-        signed_view = signed_request(self.view)
+        signed_view = signature_required(self.view)
         response = signed_view(request)
         self.assertEqual(400, response.status_code)
 
@@ -60,7 +60,7 @@ class SignedRequestTests(test.TestCase):
             constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
             constants.CLIENT_ID_PARAM_NAME: client.client_id,
         })
-        signed_view = signed_request(self.view)
+        signed_view = signature_required(self.view)
         response = signed_view(request)
         self.assertEqual(200, response.status_code)
 
@@ -74,7 +74,7 @@ class SignedRequestTests(test.TestCase):
             constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
             constants.CLIENT_ID_PARAM_NAME: client.client_id,
         })
-        signed_view = signed_request(self.view)
+        signed_view = signature_required(self.view)
         signed_view(request)
 
         get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
@@ -90,11 +90,11 @@ class SignedRequestTests(test.TestCase):
         url += "&" + constants.CLIENT_ID_PARAM_NAME + "=" + client.client_id
 
         request = test.client.RequestFactory().post(url, data={'username': 'tester'})
-        signed_view = signed_request(self.view)
+        signed_view = signature_required(self.view)
         signed_view(request)
 
         get_signature.assert_called_once_with(client.private_key, request.get_full_path(), request.POST)
 
     def test_signed_views_are_csrf_exempt(self):
-        signed_view = signed_request(self.view)
+        signed_view = signature_required(self.view)
         self.assertTrue(getattr(signed_view, 'csrf_exempt', False))

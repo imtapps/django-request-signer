@@ -4,8 +4,7 @@ import urllib2
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.http import urlencode
-
-import request_signer
+from request_signer import constants, AuthSigner
 
 __all__ = ('HttpMethodNotAllowed', 'Request', 'Response', 'Client', )
 
@@ -22,26 +21,11 @@ class Client(object):
         return Response(response)
 
     def _get_request(self, http_method, endpoint, data=None):
-        request = Request(http_method, self._get_service_url(endpoint), data)
-        self._sign_request(request)
-        return request
-
-    def _sign_request(self, request):
-        signer = request_signer.AuthSigner(self._private_key)
-        signature = signer.create_signature(request.get_selector(), request.get_data_dict())
-        request.add_header(self._signature_param_name, signature)
-        request.add_header(self._client_id_param_name, self._client_id)
+        factory = SignedRequestFactory(self._client_id, self._private_key)
+        return factory.create_request(http_method, self._get_service_url(endpoint), data)
 
     def _get_service_url(self, endpoint):
         return self._base_url + endpoint
-
-    @property
-    def _signature_param_name(self):
-        return self.get_client_name('signature_param_name')
-
-    @property
-    def _client_id_param_name(self):
-        return self.get_client_name('client_id_param_name')
 
     @property
     def _base_url(self):
@@ -71,26 +55,47 @@ class Client(object):
 class HttpMethodNotAllowed(Exception):
     pass
 
+class SignedRequestFactory(object):
+
+    def __init__(self, client_id, private_key):
+        self.client_id = client_id
+        self.private_key = private_key
+
+    def create_request(self, http_method, url, raw_data, *args, **kwargs):
+        url = self.build_request_url(http_method, raw_data, url)
+        data = self.get_data_payload(http_method, raw_data)
+        return Request(http_method, url, data, *args, **kwargs)
+
+    def build_request_url(self, http_method, raw_data, url):
+        url = self.build_client_url(url)
+        if self.is_get_request_with_data(http_method, raw_data):
+            url += "&{0}".format(urlencode(raw_data))
+        return self.build_signed_url(raw_data, url)
+
+    def build_signed_url(self, raw_data, url):
+        signature = AuthSigner.get_signature(self.private_key, url, raw_data)
+        url += "&{}={}".format(constants.SIGNATURE_PARAM_NAME, signature)
+        return url
+
+    def get_data_payload(self, http_method, raw_data):
+        if raw_data and http_method.lower() != 'get':
+            return urlencode(raw_data)
+
+    def is_get_request_with_data(self, method, raw_data):
+        return method.lower() == 'get' and raw_data
+
+    def build_client_url(self, url):
+        url += "?%s=%s" % (constants.CLIENT_ID_PARAM_NAME, self.client_id)
+        return url
+
 class Request(urllib2.Request, object):
     http_method_names = ['get', 'post', 'put', 'delete', 'head', 'options', 'trace']
 
-    def get_data_dict(self):
-        return self._data_dict
-
     def __init__(self, http_method, url, data, *args, **kwargs):
-        self._data_dict = None
         method_lower = http_method.lower()
         if method_lower not in self.http_method_names:
             raise HttpMethodNotAllowed
         self.http_method = http_method
-
-        if method_lower == 'get' and data:
-            url += "?{0}".format(urlencode(data))
-            data = None
-        elif data:
-            self._data_dict = data
-            data = urlencode(data)
-
         super(Request, self).__init__(url, data, *args, **kwargs)
 
     def get_method(self):

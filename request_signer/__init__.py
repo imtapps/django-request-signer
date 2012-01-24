@@ -18,7 +18,7 @@ def is_list(v):
 def sort_vals(vals):
     return sorted(vals) if is_list(vals) else vals
 
-def signed_request(func):
+def signature_required(func):
     """
     Decorator to require a signed request.
 
@@ -79,7 +79,6 @@ class AuthSigner(object):
     def get_signature(cls, private_key, base_url, payload=None):
         return cls(private_key).create_signature(base_url, payload)
 
-
     def create_signature(self, base_url, payload=None):
         """
         Creates unique signature for request.
@@ -93,19 +92,28 @@ class AuthSigner(object):
         """
         url = urlparse.urlparse(base_url)
 
-        url_to_sign = url.path + '?' + self.remove_signature_from_querystring(url)
-        encoded_payload = self._encode_payload(payload)
+        url_to_sign = url.path + '?' + self.get_signature_querystring(url)
+        encoded_payload = self.get_signature_payload(payload)
 
         decoded_key = base64.urlsafe_b64decode(self.private_key.encode('utf-8'))
         signature = hmac.new(decoded_key, url_to_sign + encoded_payload, hashlib.sha256)
         return base64.urlsafe_b64encode(signature.digest())
 
-    def remove_signature_from_querystring(self, url):
+    def get_signature_payload(self, payload):
+        our_payload = dict(payload) if payload else {}
+        self.remove_signature(our_payload)
+        encoded_payload = self._encode_payload(our_payload)
+        return encoded_payload
+
+    def get_signature_querystring(self, url):
         tmp = urlparse.parse_qs(url.query)
-        if constants.SIGNATURE_PARAM_NAME in tmp:
-            del tmp[constants.SIGNATURE_PARAM_NAME]
+        self.remove_signature(tmp)
         querystring = urllib.urlencode(tmp, True)
         return querystring
+
+    def remove_signature(self, our_payload):
+        if constants.SIGNATURE_PARAM_NAME in our_payload:
+            del our_payload[constants.SIGNATURE_PARAM_NAME]
 
     def _encode_payload(self, payload):
         """

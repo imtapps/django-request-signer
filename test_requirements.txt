@@ -1,1 +1,4 @@
 mock
+django-jenkins
+pyflakes
+pep8
