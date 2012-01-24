@@ -81,7 +81,7 @@ class ClientTests(unittest.TestCase):
             method,
             'my_url?{}={}&this=is&right=here&some=data&{}={}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, 'eVk5JR1Wszj9h5hwGGpwfJ0scyr8x_dL0txmJV9zFZ8='),
+                constants.SIGNATURE_PARAM_NAME, 'KpgZbsM6iwzTkyDI4MHpZFVLDxcjd0A68-c3kcunBzg='),
             None,
         )
 

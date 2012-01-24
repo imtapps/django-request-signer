@@ -7,7 +7,7 @@ REQUIREMENTS = ['Django', 'south']
 def do_setup():
     setup(
         name='django-request-signer',
-        version='0.0.1',
+        version='0.0.2',
         install_requires=REQUIREMENTS,
         packages=find_packages(exclude=['example']),
         cmdclass={

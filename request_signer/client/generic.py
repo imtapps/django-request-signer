@@ -21,8 +21,8 @@ class Client(object):
         return Response(response)
 
     def _get_request(self, http_method, endpoint, data=None):
-        factory = SignedRequestFactory(self._client_id, self._private_key)
-        return factory.create_request(http_method, self._get_service_url(endpoint), data)
+        factory = SignedRequestFactory(http_method, self._client_id, self._private_key)
+        return factory.create_request(self._get_service_url(endpoint), data)
 
     def _get_service_url(self, endpoint):
         return self._base_url + endpoint
@@ -57,32 +57,34 @@ class HttpMethodNotAllowed(Exception):
 
 class SignedRequestFactory(object):
 
-    def __init__(self, client_id, private_key):
+    def __init__(self, http_method, client_id, private_key):
         self.client_id = client_id
         self.private_key = private_key
+        self.http_method = http_method
 
-    def create_request(self, http_method, url, raw_data, *args, **kwargs):
-        url = self.build_request_url(http_method, raw_data, url)
-        data = self.get_data_payload(http_method, raw_data)
-        return Request(http_method, url, data, *args, **kwargs)
+    def create_request(self, url, raw_data, *args, **kwargs):
+        url = self.build_request_url(raw_data, url)
+        data = self.get_data_payload(raw_data)
+        return Request(self.http_method, url, data, *args, **kwargs)
 
-    def build_request_url(self, http_method, raw_data, url):
+    def build_request_url(self, raw_data, url):
         url = self.build_client_url(url)
-        if self.is_get_request_with_data(http_method, raw_data):
+        if self.is_get_request_with_data(raw_data):
             url += "&{0}".format(urlencode(raw_data))
         return self.build_signed_url(raw_data, url)
 
     def build_signed_url(self, raw_data, url):
-        signature = AuthSigner.get_signature(self.private_key, url, raw_data)
+        data = {} if self.is_get_request_with_data(raw_data) else raw_data
+        signature = AuthSigner.get_signature(self.private_key, url, data)
         url += "&{}={}".format(constants.SIGNATURE_PARAM_NAME, signature)
         return url
 
-    def get_data_payload(self, http_method, raw_data):
-        if raw_data and http_method.lower() != 'get':
+    def get_data_payload(self, raw_data):
+        if raw_data and self.http_method.lower() != 'get':
             return urlencode(raw_data)
 
-    def is_get_request_with_data(self, method, raw_data):
-        return method.lower() == 'get' and raw_data
+    def is_get_request_with_data(self, raw_data):
+        return self.http_method.lower() == 'get' and raw_data
 
     def build_client_url(self, url):
         url += "?%s=%s" % (constants.CLIENT_ID_PARAM_NAME, self.client_id)
