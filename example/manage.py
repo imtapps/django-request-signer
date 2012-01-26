@@ -10,5 +10,16 @@ except ImportError:
 
 import settings
 
+def monkey_patch_for_multi_threaded():
+    import BaseHTTPServer, SocketServer
+    OriginalHTTPServer = BaseHTTPServer.HTTPServer
+
+    class ThreadedHTTPServer(SocketServer.ThreadingMixIn, OriginalHTTPServer):
+        def __init__(self, server_address, RequestHandlerClass=None):
+            OriginalHTTPServer.__init__(self, server_address, RequestHandlerClass)
+
+    BaseHTTPServer.HTTPServer = ThreadedHTTPServer
+
 if __name__ == "__main__":
+    monkey_patch_for_multi_threaded()
     execute_manager(settings)

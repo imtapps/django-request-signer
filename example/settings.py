@@ -128,6 +128,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_jenkins',
+    'server',
+    'lettuce.django',
 ) + PROJECT_APPS
 
 JENKINS_TASKS = (

@@ -2,3 +2,4 @@ mock
 django-jenkins
 pyflakes
 pep8
+lettuce
