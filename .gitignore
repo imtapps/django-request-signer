@@ -11,3 +11,5 @@ example.db
 *.egg-info/*
 
 dist/*
+
+doc/build/*
