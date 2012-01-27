@@ -5,6 +5,7 @@
 .idea/*
 
 jenkins_reports/*
+reports/*
 build/*
 example.db
 

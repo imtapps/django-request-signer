@@ -97,3 +97,5 @@ LOGGING = {
 }
 
 PYLINT_RCFILE = join(parent, 'pylint.rc')
+
+SOUTH_TESTS_MIGRATE = False
