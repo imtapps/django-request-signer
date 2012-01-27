@@ -8,11 +8,26 @@ def do_setup():
     setup(
         name='django-request-signer',
         version='0.0.2',
+        author='imtapps',
+        url='https://github.com/imtapps/django-request-signer',
+        description="A python library for signing http requests.",
+        long_description=file(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
         install_requires=REQUIREMENTS,
         packages=find_packages(exclude=['example']),
         cmdclass={
             'install_dev': InstallDependencies,
-        }
+        },
+        classifiers=[
+            'Development Status :: 5 - Production/Stable',
+            'Intended Audience :: Developers',
+            'Natural Language :: English',
+            'Operating System :: OS Independent',
+            'Programming Language :: Python :: 2',
+            'License :: OSI Approved :: BSD License',
+            'Topic :: Internet',
+            'Topic :: Internet :: WWW/HTTP',
+            'Topic :: Software Development :: Libraries :: Python Modules',
+        ],
     )
 
 class InstallDependencies(Command):
