@@ -1,11 +1,14 @@
+
 from cStringIO import StringIO
 import urllib2
+import mock
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-import mock
 from django.utils import unittest
-from request_signer.client.generic import Request, Response, Client
+
 from request_signer import constants
+from request_signer.client.generic import Request, Response, Client
 
 __all__ = ('ClientTests', )
 

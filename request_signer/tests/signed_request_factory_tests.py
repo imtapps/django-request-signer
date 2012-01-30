@@ -1,6 +1,9 @@
+
 from urllib import urlencode
 import mock
+
 from django.utils import unittest
+
 from request_signer.client import generic
 from request_signer import constants
 
