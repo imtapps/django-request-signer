@@ -1,10 +1,11 @@
-from django.db import models
 
-import time
-import random
-import hmac
 import base64
 import hashlib
+import hmac
+import random
+import time
+
+from django.db import models
 
 def create_private_key():
     """
@@ -14,8 +15,9 @@ def create_private_key():
         base64_urlsafe private key
     """
     msg = "{0}{1}".format(time.time(), random.random())
-    s = hmac.new("APPSAuth", msg, hashlib.sha256)
+    s = hmac.new("request-signer", msg, hashlib.sha256)
     return base64.urlsafe_b64encode(s.digest())
+
 
 class AuthorizedClient(models.Model):
     client_id = models.CharField(max_length=20, primary_key=True)
