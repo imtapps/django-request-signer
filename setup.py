@@ -7,11 +7,11 @@ REQUIREMENTS = ['Django', 'south']
 def do_setup():
     setup(
         name='django-request-signer',
-        version='0.0.3',
+        version='0.0.2',
         author='imtapps',
         url='https://github.com/imtapps/django-request-signer',
         description="A python library for signing http requests.",
-        long_description=file(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
+        long_description=open('README.rst', 'r').read(),
         install_requires=REQUIREMENTS,
         packages=find_packages(exclude=['example']),
         cmdclass={
