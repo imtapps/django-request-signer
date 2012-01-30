@@ -1,6 +1,9 @@
+
 from django.conf.urls.defaults import patterns, include, url
-from request_signer import signature_required
 from django.contrib import admin
+
+from request_signer.decorators import signature_required
+
 from server import views
 
 admin.autodiscover()

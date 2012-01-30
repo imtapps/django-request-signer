@@ -11,7 +11,7 @@ You can create a signed URL using the SignedRequestFactory's build_request_url m
     from request_signer.client.generic import SignedRequestFactory
 
     factory = SignedRequestFactory('http_method', 'client_id', 'private_key')
-    signed_request_url = factory.build_request_url(post_data_dict_or_none, 'request_url')
+    signed_request_url = factory.build_request_url('request_url', post_data_dict_or_none)
 
 Alternatively, you can create a client class to encapsulate dealing with external services::
 

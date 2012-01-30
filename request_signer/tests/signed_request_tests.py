@@ -1,7 +1,10 @@
 import mock
+
 from django import test
 from django import http
-from request_signer import signature_required, models, constants
+
+from request_signer import  models, constants
+from request_signer.decorators import signature_required
 
 __all__ = ('SignedRequestTests', )
 
@@ -38,7 +41,7 @@ class SignedRequestTests(test.TestCase):
         response = signed_view(request)
         self.assertEqual(400, response.status_code)
 
-    @mock.patch('request_signer.AuthSigner.get_signature')
+    @mock.patch('request_signer.signer.SignatureMaker.get_signature')
     def test_returns_400_when_signature_doesnt_match(self, get_signature):
         get_signature.return_value = 'ABCDEFGHIJKLMNOPQRSTUVWXYZFtYkCdi4XAc-vOLtI='
 
@@ -51,7 +54,7 @@ class SignedRequestTests(test.TestCase):
         response = signed_view(request)
         self.assertEqual(400, response.status_code)
 
-    @mock.patch('request_signer.AuthSigner.get_signature')
+    @mock.patch('request_signer.signer.SignatureMaker.get_signature')
     def test_returns_200_view_return_value_when_signature_matches(self, get_signature):
         get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
 
@@ -64,7 +67,7 @@ class SignedRequestTests(test.TestCase):
         response = signed_view(request)
         self.assertEqual(200, response.status_code)
 
-    @mock.patch('request_signer.AuthSigner.get_signature')
+    @mock.patch('request_signer.signer.SignatureMaker.get_signature')
     def test_calls_create_signature_properly_with_get_data(self, get_signature):
         get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
 
@@ -79,7 +82,7 @@ class SignedRequestTests(test.TestCase):
 
         get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
 
-    @mock.patch('request_signer.AuthSigner.get_signature')
+    @mock.patch('request_signer.signer.SignatureMaker.get_signature')
     def test_calls_create_signature_properly_with_post_data(self, get_signature):
         get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
 

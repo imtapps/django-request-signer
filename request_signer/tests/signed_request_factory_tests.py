@@ -68,7 +68,7 @@ class SignedRequestFactoryTests(unittest.TestCase):
         url = "www.myurl.com?asdf=1234"
         data = {'asdf': '1234'}
 
-        first_request = self.factory.build_signed_url(data, url)
-        second_request = self.factory.build_signed_url({}, url)
+        first_request = self.factory._build_signed_url(url, data)
+        second_request = self.factory._build_signed_url(url, {})
 
         self.assertEqual(first_request, second_request)
