@@ -9,7 +9,7 @@ About
 Django Request Signer provides both a client and a server component to
 assist in verifying that both the sending and receiving ends of a web
 service call can trust one another. This trust is established by allowing
-clients to register with the server and recieve a unique public client id
+clients to register with the server and receive a unique public client id
 and a private key.
 
 How it Works
