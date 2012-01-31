@@ -2,12 +2,14 @@ import os
 from distutils.core import Command
 from setuptools import find_packages, setup
 
+from request_signer import VERSION
+
 REQUIREMENTS = ['Django', 'south']
 
 def do_setup():
     setup(
         name='django-request-signer',
-        version='0.0.2',
+        version=VERSION,
         author='imtapps',
         url='https://github.com/imtapps/django-request-signer',
         description="A python library for signing http requests.",
