@@ -32,6 +32,11 @@ class SignedRequestTests(test.TestCase):
         response = signed_view(request)
         self.assertEqual(400, response.status_code)
 
+    def test_adds_signature_required_attribute_to_view(self):
+        self.assertFalse(hasattr(self.view, 'signature_required'))
+        signed_view = signature_required(self.view)
+        self.assertTrue(getattr(signed_view, 'signature_required', False))
+
     def test_returns_400_response_when_request_doesnt_have_client_id_header(self):
         request = self.get_request(
             HTTP_X_APPS_AUTH_SIGNATURE='4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',

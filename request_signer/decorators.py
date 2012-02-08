@@ -46,4 +46,5 @@ def signature_required(func):
         else:
             return http.HttpResponseBadRequest()
 
+    _wrap.signature_required = True
     return _wrap
