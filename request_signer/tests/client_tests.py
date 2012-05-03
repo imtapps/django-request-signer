@@ -82,9 +82,9 @@ class ClientTests(unittest.TestCase):
 
         request.assert_called_once_with(
             method,
-            'my_url?{}={}&this=is&right=here&some=data&{}={}'.format(
+            'my_url?{0}={1}&this=is&right=here&some=data&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, 'KpgZbsM6iwzTkyDI4MHpZFVLDxcjd0A68-c3kcunBzg='),
+                constants.SIGNATURE_PARAM_NAME, 'JjZFNxsw8HRZnuMlqGr_U4kLU_yHXxPpSm-3mbPdj9g='),
             None,
         )
 

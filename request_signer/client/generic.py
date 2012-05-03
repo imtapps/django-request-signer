@@ -5,8 +5,9 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.http import urlencode
 
+import apysigner
+
 from request_signer import constants
-from request_signer.signer import SignatureMaker
 
 __all__ = (
     'HttpMethodNotAllowed',
@@ -100,9 +101,9 @@ class SignedRequestFactory(object):
 
     def _build_signed_url(self, url, raw_data):
         data = {} if self._is_get_request_with_data(raw_data) else raw_data
-        signature = SignatureMaker.get_signature(self.private_key, url, data)
-        url += "&{}={}".format(constants.SIGNATURE_PARAM_NAME, signature)
-        return url
+        signature = apysigner.get_signature(self.private_key, url, data)
+        signed_url = url + "&{}={}".format(constants.SIGNATURE_PARAM_NAME, signature)
+        return signed_url
 
     def _get_data_payload(self, raw_data):
         if raw_data and self.http_method.lower() != 'get':

@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 from request_signer import VERSION
 
-REQUIREMENTS = ['Django', 'south']
+REQUIREMENTS = ['Django', 'south', 'apysigner']
 
 def do_setup():
     setup(

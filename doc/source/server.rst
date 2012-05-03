@@ -23,7 +23,7 @@ Function based views
 
 ::
 
-    from request_signer import signature_required
+    from request_signer.decorators import signature_required
 
     @signature_required
     def myview(request):
@@ -33,7 +33,7 @@ Class based views
 
 ::
 
-    from request_signer import signature_required
+    from request_signer.decorators import signature_required
 
     url(r'sample/',  signature_required(views.MyView.as_view())),
 
