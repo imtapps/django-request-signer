@@ -48,7 +48,7 @@ class SignedRequestTests(test.TestCase):
         response = signed_view(request)
         self.assertEqual(400, response.status_code)
 
-    @mock.patch('request_signer.signer.SignatureMaker.get_signature')
+    @mock.patch('apysigner.get_signature')
     def test_returns_400_when_signature_doesnt_match(self, get_signature):
         get_signature.return_value = 'ABCDEFGHIJKLMNOPQRSTUVWXYZFtYkCdi4XAc-vOLtI='
 

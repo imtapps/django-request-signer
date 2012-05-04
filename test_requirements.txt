@@ -1,5 +1,7 @@
 mock
 django-jenkins
+pylint
+coverage
 pyflakes
 pep8
 lettuce

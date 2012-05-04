@@ -42,8 +42,8 @@ class InstallDependencies(Command):
         pass
 
     def run(self):
-        os.system("pip install %s" % ' '.join(REQUIREMENTS))
-        os.system("pip install -r test_requirements.txt")
+        os.system("pip install %s -i http://chishop.apps-system.com" % ' '.join(REQUIREMENTS))
+        os.system("pip install -r test_requirements.txt  -i http://chishop.apps-system.com")
 
 if __name__ == '__main__':
     do_setup()
