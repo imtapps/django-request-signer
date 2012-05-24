@@ -23,16 +23,17 @@ CLIENT_SETTINGS_ERROR_MESSAGE = "Settings must contain a `{0}` attribute"
 
 class Client(object):
 
-    def _get_response(self, http_method, endpoint, data=None):
+    def _get_response(self, http_method, endpoint, data=None, content_type=None):
         try:
-            response = urllib2.urlopen(self._get_request(http_method, endpoint, data))
+            response = urllib2.urlopen(self._get_request(http_method, endpoint, data, content_type))
         except urllib2.HTTPError as e:
             response = e
         return Response(response)
 
-    def _get_request(self, http_method, endpoint, data=None):
-        factory = SignedRequestFactory(http_method, self._client_id, self._private_key)
-        return factory.create_request(self._get_service_url(endpoint), data)
+    def _get_request(self, http_method, endpoint, data=None, content_type=None):
+        factory = SignedRequestFactory(http_method, self._client_id, self._private_key, content_type)
+        service_url = self._get_service_url(endpoint)
+        return factory.create_request(service_url, data)
 
     def _get_service_url(self, endpoint):
         return self._base_url + endpoint
@@ -72,10 +73,16 @@ class SignedRequestFactory(object):
     Creates a signed http request.
     """
 
-    def __init__(self, http_method, client_id, private_key):
+    def __init__(self, http_method, client_id, private_key, content_type=None):
         self.client_id = client_id
         self.private_key = private_key
         self.http_method = http_method
+        self.content_type = content_type
+
+        self.content_type_encodings = {
+            'application/json': self.json_encoding,
+            None: self.default_encoding,
+        }
 
     def create_request(self, url, raw_data, *args, **kwargs):
         """
@@ -91,7 +98,13 @@ class SignedRequestFactory(object):
         """
         url = self.build_request_url(url, raw_data)
         data = self._get_data_payload(raw_data)
-        return Request(self.http_method, url, data, *args, **kwargs)
+        return Request(self.http_method, url, data, *args, **self._get_request_args(**kwargs))
+
+    def _get_request_args(self, **kwargs):
+        request_args = dict(**kwargs)
+        if self.content_type:
+            request_args['headers'] = {'Content-Type': self.content_type}
+        return request_args
 
     def build_request_url(self, url, raw_data):
         url = self._build_client_url(url)
@@ -107,7 +120,13 @@ class SignedRequestFactory(object):
 
     def _get_data_payload(self, raw_data):
         if raw_data and self.http_method.lower() != 'get':
-            return urlencode(raw_data)
+            return self.content_type_encodings[self.content_type](raw_data)
+
+    def default_encoding(self, raw_data):
+        return urlencode(raw_data)
+
+    def json_encoding(self, raw_data):
+        return json.dumps(raw_data)
 
     def _is_get_request_with_data(self, raw_data):
         return self.http_method.lower() == 'get' and raw_data

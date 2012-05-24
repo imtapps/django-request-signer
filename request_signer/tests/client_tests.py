@@ -1,5 +1,6 @@
 
 from cStringIO import StringIO
+import json
 import urllib2
 import mock
 
@@ -86,6 +87,23 @@ class ClientTests(unittest.TestCase):
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
                 constants.SIGNATURE_PARAM_NAME, 'JjZFNxsw8HRZnuMlqGr_U4kLU_yHXxPpSm-3mbPdj9g='),
             None,
+        )
+
+    @mock.patch('request_signer.client.generic.Request')
+    def test_get_response_creates_request_with_json_payload(self, request):
+        method = 'POST'
+        data = dict(this="is", some='data', right='here')
+        with mock.patch.object(Client, '_get_service_url') as get_url:
+            get_url.return_value = 'my_url'
+            self.get_response(method, self.endpoint, data, content_type="application/json")
+
+        request.assert_called_once_with(
+            method,
+            'my_url?{0}={1}&{2}={3}'.format(
+                constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
+                constants.SIGNATURE_PARAM_NAME, '0R98AGFfWDnkwL4phL3ET3PJa-GVcy5ZC2mJPOEJFFc='),
+            json.dumps(data),
+            headers={'Content-Type': 'application/json'}
         )
 
     @mock.patch('request_signer.client.generic.Request', mock.Mock())
