@@ -73,20 +73,20 @@ def signature_required(func):
         client = models.AuthorizedClient.get_by_client(client_id)
         if client:
             url_path = request.get_full_path()
-            post_data = get_post_data(request)
-            signature_valid = check_signature(signature, client.private_key, url_path, post_data)
+            request_data = get_request_data(request)
+            signature_valid = check_signature(signature, client.private_key, url_path, request_data)
 
         if signature_valid:
             return func(request, *args, **kwargs)
         else:
             return http.HttpResponseBadRequest()
 
-    def get_post_data(request):
-        if request.META['CONTENT_TYPE'] == 'application/json':
-            post_data = json.loads(request.raw_post_data)
+    def get_request_data(request):
+        if request.META.get('CONTENT_TYPE') == 'application/json':
+            request_data = json.loads(request.raw_post_data)
         else:
-            post_data = request.POST or None
-        return post_data
+            request_data = request.POST or None
+        return request_data
 
     _wrap.signature_required = True
     return _wrap

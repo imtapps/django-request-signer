@@ -91,6 +91,22 @@ class SignedRequestTests(test.TestCase):
         get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
 
     @mock.patch('apysigner.get_signature')
+    def test_calls_create_signature_properly_with_no_content_type(self, get_signature):
+        get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        request = test.client.RequestFactory().get('/my/path/', data={
+            'username': 'tester',
+            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+            constants.CLIENT_ID_PARAM_NAME: client.client_id,
+        })
+        del request.META['CONTENT_TYPE']
+        signed_view = signature_required(self.view)
+        signed_view(request)
+
+        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
+
+    @mock.patch('apysigner.get_signature')
     def test_json_is_properly_parsed_into_signature(self, get_signature):
         signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
         get_signature.return_value = signature
