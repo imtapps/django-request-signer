@@ -1,3 +1,4 @@
+import json
 import mock
 
 from django import test
@@ -88,6 +89,42 @@ class SignedRequestTests(test.TestCase):
         signed_view(request)
 
         get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
+
+    @mock.patch('apysigner.get_signature')
+    def test_json_is_properly_parsed_into_signature(self, get_signature):
+        signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+        get_signature.return_value = signature
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = "/my/path/?{}={}&{}={}".format(
+            constants.SIGNATURE_PARAM_NAME, signature, constants.CLIENT_ID_PARAM_NAME, client.client_id
+        )
+        data = {'our': 'data', 'goes': 'here'}
+        json_string = json.dumps(data)
+        request = test.client.RequestFactory().post(url, data=json_string, content_type="application/json")
+        signed_view = signature_required(self.view)
+        signed_view(request)
+
+        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), data)
+
+    @mock.patch('apysigner.get_signature')
+    def test_invalid_json_requests_raise_json_parse_eror(self, get_signature):
+        signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+        get_signature.return_value = signature
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = "/my/path/?{}={}&{}={}".format(
+            constants.SIGNATURE_PARAM_NAME, signature, constants.CLIENT_ID_PARAM_NAME, client.client_id
+        )
+        data = "'our': 'data', 'goes': 'here'"
+        request = test.client.RequestFactory().post(url, data=data, content_type="application/json")
+        signed_view = signature_required(self.view)
+
+        with self.assertRaises(ValueError) as context:
+            signed_view(request)
+
+        self.assertEqual("No JSON object could be decoded", context.exception.message)
+
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_post_data(self, get_signature):
