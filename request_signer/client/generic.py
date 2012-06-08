@@ -115,7 +115,7 @@ class SignedRequestFactory(object):
     def _build_signed_url(self, url, raw_data):
         data = {} if self._is_get_request_with_data(raw_data) else raw_data
         signature = apysigner.get_signature(self.private_key, url, data)
-        signed_url = url + "&{}={}".format(constants.SIGNATURE_PARAM_NAME, signature)
+        signed_url = url + "&{0}={1}".format(constants.SIGNATURE_PARAM_NAME, signature)
         return signed_url
 
     def _get_data_payload(self, raw_data):
