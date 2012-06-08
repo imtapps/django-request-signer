@@ -5,11 +5,29 @@ import json
 import apysigner
 
 from django import http
-from django.utils.crypto import constant_time_compare
 from django.views.decorators.csrf import csrf_exempt
 import re
 
-from request_signer import  constants, models
+from request_signer import constants, models
+
+try:
+    # Django version >= 1.3
+    from django.utils.crypto import constant_time_compare
+except ImportError:
+    # Django version < 1.3
+    # Source: Django 1.4 django.utils.crypto module.
+    def constant_time_compare(val1, val2):
+        """
+        Returns True if the two strings are equal, False otherwise.
+
+        The time taken is independent of the number of characters that match.
+        """
+        if len(val1) != len(val2):
+            return False
+        result = 0
+        for x, y in zip(val1, val2):
+            result |= ord(x) ^ ord(y)
+        return result == 0
 
 
 def check_signature(signature, private_key, full_path, payload):
@@ -32,6 +50,7 @@ def check_signature(signature, private_key, full_path, payload):
     url_to_check = _strip_signature_from_url(signature, full_path)
     computed_signature = apysigner.get_signature(private_key, url_to_check, payload)
     return constant_time_compare(signature, computed_signature)
+
 
 def _strip_signature_from_url(signature, url_path):
     """
