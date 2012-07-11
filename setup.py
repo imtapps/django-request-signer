@@ -11,8 +11,7 @@ setup(
     description="A python library for signing http requests.",
     long_description=open('README.rst', 'r').read(),
     install_requires=file('requirements/dist.txt').read().split("\n"),
-    tests_require=file('requirements/test.txt').read().split("\n"),
-    packages=find_packages(exclude=["example", "request_signer.tests"]),
+    packages=find_packages(exclude=("example", "request_signer.tests")),
 
     classifiers=[
         'Development Status :: 5 - Production/Stable',
