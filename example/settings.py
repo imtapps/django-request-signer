@@ -66,6 +66,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_jenkins',
+    'django_nose',
     'server',
     'lettuce.django',
 ) + PROJECT_APPS
@@ -98,4 +99,5 @@ LOGGING = {
 
 PYLINT_RCFILE = join(parent, 'pylint.rc')
 
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 SOUTH_TESTS_MIGRATE = False
