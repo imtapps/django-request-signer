@@ -1,3 +1,5 @@
+-r dist.txt
+
 mock
 django-jenkins
 django-nose
@@ -7,6 +9,5 @@ coverage
 pyflakes
 pep8
 lettuce
-
 
 pycharm_testrunner
