@@ -6,14 +6,14 @@ import mock
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import unittest
+from django import test
 
 from request_signer import constants
 from request_signer.client.generic import Request, Response, Client
 
 __all__ = ('ClientTests', )
 
-class ClientTests(unittest.TestCase):
+class ClientTests(test.TestCase):
 
     def setUp(self):
         self.settings_name = 'SAMPLE_AUTH_DOMAIN'
@@ -73,29 +73,32 @@ class ClientTests(unittest.TestCase):
             getattr(self.client, client_property)
         self.assertIn(settings_name, error.exception.message)
 
-    @mock.patch('request_signer.client.generic.Request')
+    @mock.patch('request_signer.client.generic.base.Request')
     def test_get_response_creates_request(self, request):
         method = 'GET'
         data = dict(this="is", some='data', right='here')
+        request_kwargs = {"headers": {"Accept": "application/json"}}
         with mock.patch.object(Client, '_get_service_url') as get_url:
             get_url.return_value = 'my_url'
-            self.get_response(method, self.endpoint, data)
+            self.get_response(method, self.endpoint, data, **request_kwargs)
 
         request.assert_called_once_with(
             method,
             'my_url?{0}={1}&this=is&right=here&some=data&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
                 constants.SIGNATURE_PARAM_NAME, 'JjZFNxsw8HRZnuMlqGr_U4kLU_yHXxPpSm-3mbPdj9g='),
-            None,
+            None, # data
+            **request_kwargs
         )
 
-    @mock.patch('request_signer.client.generic.Request')
+    @mock.patch('request_signer.client.generic.base.Request')
     def test_get_response_creates_request_with_json_payload(self, request):
         method = 'POST'
         data = dict(this="is", some='data', right='here')
+        request_kwargs = dict(headers={"Content-Type": "application/json"})
         with mock.patch.object(Client, '_get_service_url') as get_url:
             get_url.return_value = 'my_url'
-            self.get_response(method, self.endpoint, data, content_type="application/json")
+            self.get_response(method, self.endpoint, data, **request_kwargs)
 
         request.assert_called_once_with(
             method,
@@ -103,10 +106,9 @@ class ClientTests(unittest.TestCase):
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
                 constants.SIGNATURE_PARAM_NAME, '0R98AGFfWDnkwL4phL3ET3PJa-GVcy5ZC2mJPOEJFFc='),
             json.dumps(data),
-            headers={'Content-Type': 'application/json'}
+            **request_kwargs
         )
 
-    @mock.patch('request_signer.client.generic.Request', mock.Mock())
     def test_get_response_gets_url_with_endpoint(self):
         with mock.patch.object(Client, '_get_service_url') as get_url:
             get_url.return_value = 'url'
@@ -153,7 +155,7 @@ class ClientTests(unittest.TestCase):
     def test_private_key_property_returns_private_key_from_settings(self):
         self.assertEqual(self.private_key, self.client._private_key)
 
-    @mock.patch('request_signer.client.generic.Request')
+    @mock.patch('request_signer.client.generic.base.Request')
     def test_get_raw_response_invokes_urlopen_with_request(self, request):
         self.get_response()
         self.urlopen.assert_called_once_with(request.return_value)

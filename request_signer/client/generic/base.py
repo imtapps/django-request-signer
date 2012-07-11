@@ -1,3 +1,4 @@
+
 import json
 import urllib2
 
@@ -11,6 +12,7 @@ from request_signer import constants
 
 __all__ = (
     'HttpMethodNotAllowed',
+    'WebException',
     'Request',
     'Response',
     'Client',
@@ -20,20 +22,28 @@ __all__ = (
 CLIENT_ERROR_MESSAGE = "Client implementations must define a `{0}` attribute"
 CLIENT_SETTINGS_ERROR_MESSAGE = "Settings must contain a `{0}` attribute"
 
+class WebException(Exception):
+    """
+    Base Exception for client errors
+    """
+
+class HttpMethodNotAllowed(Exception):
+    pass
+
 
 class Client(object):
 
-    def _get_response(self, http_method, endpoint, data=None, content_type=None):
+    def _get_response(self, http_method, endpoint, data=None, **request_kwargs):
         try:
-            response = urllib2.urlopen(self._get_request(http_method, endpoint, data, content_type))
+            response = urllib2.urlopen(self._get_request(http_method, endpoint, data, **request_kwargs))
         except urllib2.HTTPError as e:
             response = e
         return Response(response)
 
-    def _get_request(self, http_method, endpoint, data=None, content_type=None):
-        factory = SignedRequestFactory(http_method, self._client_id, self._private_key, content_type)
+    def _get_request(self, http_method, endpoint, data=None, **request_kwargs):
+        factory = SignedRequestFactory(http_method, self._client_id, self._private_key)
         service_url = self._get_service_url(endpoint)
-        return factory.create_request(service_url, data)
+        return factory.create_request(service_url, data, **request_kwargs)
 
     def _get_service_url(self, endpoint):
         return self._base_url + endpoint
@@ -64,27 +74,23 @@ class Client(object):
         return client_name
 
 
-class HttpMethodNotAllowed(Exception):
-    pass
-
 
 class SignedRequestFactory(object):
     """
     Creates a signed http request.
     """
 
-    def __init__(self, http_method, client_id, private_key, content_type=None):
+    def __init__(self, http_method, client_id, private_key):
         self.client_id = client_id
         self.private_key = private_key
         self.http_method = http_method
-        self.content_type = content_type
 
         self.content_type_encodings = {
             'application/json': self.json_encoding,
             None: self.default_encoding,
-        }
+            }
 
-    def create_request(self, url, raw_data, *args, **kwargs):
+    def create_request(self, url, raw_data, *args, **request_kwargs):
         """
         Creates signed request.
 
@@ -97,14 +103,8 @@ class SignedRequestFactory(object):
         the urllib2.Request init method (like adding other headers, etc...)
         """
         url = self.build_request_url(url, raw_data)
-        data = self._get_data_payload(raw_data)
-        return Request(self.http_method, url, data, *args, **self._get_request_args(**kwargs))
-
-    def _get_request_args(self, **kwargs):
-        request_args = dict(**kwargs)
-        if self.content_type:
-            request_args['headers'] = {'Content-Type': self.content_type}
-        return request_args
+        data = self._get_data_payload(raw_data, request_kwargs.get("headers", {}))
+        return Request(self.http_method, url, data, *args, **request_kwargs)
 
     def build_request_url(self, url, raw_data):
         url = self._build_client_url(url)
@@ -118,9 +118,9 @@ class SignedRequestFactory(object):
         signed_url = url + "&{}={}".format(constants.SIGNATURE_PARAM_NAME, signature)
         return signed_url
 
-    def _get_data_payload(self, raw_data):
+    def _get_data_payload(self, raw_data, request_headers):
         if raw_data and self.http_method.lower() != 'get':
-            return self.content_type_encodings[self.content_type](raw_data)
+            return self.content_type_encodings[request_headers.get("Content-Type")](raw_data)
 
     def default_encoding(self, raw_data):
         return urlencode(raw_data)
