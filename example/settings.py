@@ -65,19 +65,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'django_jenkins',
     'django_nose',
     'server',
     'lettuce.django',
 ) + PROJECT_APPS
 
-JENKINS_TASKS = (
-    'django_jenkins.tasks.django_tests',
-    'django_jenkins.tasks.run_pylint',
-    'django_jenkins.tasks.run_pep8',
-    'django_jenkins.tasks.run_pyflakes',
-    'django_jenkins.tasks.with_coverage',
-    )
 
 LOGGING = {
     'version': 1,

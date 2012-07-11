@@ -1,7 +1,6 @@
 -r dist.txt
 
 mock
-django-jenkins
 django-nose
 nosexcover
 pylint
