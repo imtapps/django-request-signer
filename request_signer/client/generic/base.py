@@ -74,6 +74,13 @@ class Client(object):
         return client_name
 
 
+# encodings available when encoding signed request payload
+def default_encoding(raw_data):
+    return urlencode(raw_data)
+
+def json_encoding(raw_data):
+    return json.dumps(raw_data)
+
 
 class SignedRequestFactory(object):
     """
@@ -86,9 +93,8 @@ class SignedRequestFactory(object):
         self.http_method = http_method
 
         self.content_type_encodings = {
-            'application/json': self.json_encoding,
-            None: self.default_encoding,
-            }
+            'application/json': json_encoding,
+        }
 
     def create_request(self, url, raw_data, *args, **request_kwargs):
         """
@@ -120,13 +126,9 @@ class SignedRequestFactory(object):
 
     def _get_data_payload(self, raw_data, request_headers):
         if raw_data and self.http_method.lower() != 'get':
-            return self.content_type_encodings[request_headers.get("Content-Type")](raw_data)
-
-    def default_encoding(self, raw_data):
-        return urlencode(raw_data)
-
-    def json_encoding(self, raw_data):
-        return json.dumps(raw_data)
+            content_type = request_headers.get("Content-Type")
+            encoding_func = self.content_type_encodings.get(content_type, default_encoding)
+            return encoding_func(raw_data)
 
     def _is_get_request_with_data(self, raw_data):
         return self.http_method.lower() == 'get' and raw_data
