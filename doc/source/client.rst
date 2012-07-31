@@ -40,3 +40,31 @@ To use this client class::
     else:
         print "fail!"
 
+There is also the option to use your the database (instead of Django's settings)
+for api credentials. This allows you to call the same service
+from multiple providers::
+
+    from request_signer.models import AuthorizedServiceProvider
+
+    class MyAuthorizedServiceProvider(AuthorizedServiceProvider):
+        # any custom methods or fields may go here
+        # note that only base_url, client_id and private_key
+        # will be used by the Client
+        pass
+
+    api_credentials = MyAuthorizedServiceProvider.objects.all()
+    for api_credential in api_credentials:
+        client = OurClient(api_credentials=api_credential)
+        print client.do_your_stuff()
+
+Finally, you can create your own custom credentials object for a Client, your object
+must implement base_url, client_id, and private_key attributes::
+
+    class MyObject(object):
+        base_url = "http://my.url/here/"
+        client_id = "thisismyclientid"
+        private_key = "thisismyprivatekey"
+
+    client = OurClient(api_credentials=MyObject)
+    print client.do_your_stuff()
+
