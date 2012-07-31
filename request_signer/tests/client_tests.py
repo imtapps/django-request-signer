@@ -2,6 +2,7 @@
 from cStringIO import StringIO
 import json
 import urllib2
+from django.test.utils import override_settings
 import mock
 
 from django.conf import settings
@@ -9,9 +10,10 @@ from django.core.exceptions import ImproperlyConfigured
 from django import test
 
 from request_signer import constants
+from request_signer import models
 from request_signer.client.generic import Request, Response, Client
 
-__all__ = ('ClientTests', )
+__all__ = ('ClientTests', 'ClientBackendTests', )
 
 class ClientTests(test.TestCase):
 
@@ -171,3 +173,39 @@ class ClientTests(test.TestCase):
         error_as_response = self.get_response()
         self.assertIsInstance(error_as_response, Response)
         self.assertEqual(expected, error_as_response.raw_response)
+
+class ClientBackendTests(test.TestCase):
+
+    def test_uses_api_credentials_from_authorized_service_provider_model(self):
+        prov = models.AuthorizedServiceProvider(base_url="my_url", client_id="my_id", private_key="my_key")
+        client = Client(api_credentials=prov)
+
+        self.assertEqual(prov.base_url, client._base_url)
+        self.assertEqual(prov.client_id, client._client_id)
+        self.assertEqual(prov.private_key, client._private_key)
+
+    def test_uses_api_credentials_from_object_that_implements_api_credential_attributes(self):
+        class X(object):
+            base_url="my_url"
+            client_id="my_id"
+            private_key="my_key"
+
+        client = Client(api_credentials=X)
+
+        self.assertEqual(X.base_url, client._base_url)
+        self.assertEqual(X.client_id, client._client_id)
+        self.assertEqual(X.private_key, client._private_key)
+
+    @override_settings(TEST_DOMAIN='my_domain')
+    @override_settings(TEST_CLIENT_ID='my_client_id')
+    @override_settings(TEST_PRIVATE_KEY='my_private_key')
+    def test_uses_django_settings_by_default_for_api_credentials(self):
+        class TestClient(Client):
+            domain_settings_name = 'TEST_DOMAIN'
+            client_id_settings_name = 'TEST_CLIENT_ID'
+            private_key_settings_name = 'TEST_PRIVATE_KEY'
+
+        client = TestClient()
+        self.assertEqual('my_domain', client._base_url)
+        self.assertEqual('my_client_id', client._client_id)
+        self.assertEqual('my_private_key', client._private_key)
