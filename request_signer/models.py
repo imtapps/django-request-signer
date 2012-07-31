@@ -32,3 +32,15 @@ class AuthorizedClient(models.Model):
             return cls.objects.get(pk=client_id, is_active=True)
         except cls.DoesNotExist:
             return None
+
+
+class AuthorizedServiceProvider(models.Model):
+    base_url = models.URLField(primary_key=True)
+    client_id = models.CharField(max_length=20)
+    private_key = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta(object):
+        abstract = True

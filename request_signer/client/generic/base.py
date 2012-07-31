@@ -31,7 +31,41 @@ class HttpMethodNotAllowed(Exception):
     pass
 
 
+class SettingsApiCredentialsBackend(object):
+
+    def __init__(self, client):
+        self.client = client
+
+    @property
+    def base_url(self):
+        return self.get_setting('domain_settings_name')
+
+    @property
+    def client_id(self):
+        return self.get_setting('client_id_settings_name')
+
+    @property
+    def private_key(self):
+        return self.get_setting('private_key_settings_name')
+
+    def get_setting(self, name):
+        client_name = self.get_client_name(name)
+        setting = getattr(settings, client_name, None)
+        if not setting:
+            raise ImproperlyConfigured(CLIENT_SETTINGS_ERROR_MESSAGE.format(client_name))
+        return setting
+
+    def get_client_name(self, name):
+        client_name = getattr(self.client, name, None)
+        if not client_name:
+            raise ImproperlyConfigured(CLIENT_ERROR_MESSAGE.format(name))
+        return client_name
+
+
 class Client(object):
+
+    def __init__(self, api_credentials=None):
+        self.api_credentials = api_credentials or SettingsApiCredentialsBackend(self)
 
     def _get_response(self, http_method, endpoint, data=None, **request_kwargs):
         try:
@@ -50,28 +84,15 @@ class Client(object):
 
     @property
     def _base_url(self):
-        return self.get_setting('domain_settings_name')
+        return self.api_credentials.base_url
 
     @property
     def _client_id(self):
-        return self.get_setting('client_id_settings_name')
+        return self.api_credentials.client_id
 
     @property
     def _private_key(self):
-        return self.get_setting('private_key_settings_name')
-
-    def get_setting(self, name):
-        client_name = self.get_client_name(name)
-        setting = getattr(settings, client_name, None)
-        if not setting:
-            raise ImproperlyConfigured(CLIENT_SETTINGS_ERROR_MESSAGE.format(client_name))
-        return setting
-
-    def get_client_name(self, name):
-        client_name = getattr(self, name, None)
-        if not client_name:
-            raise ImproperlyConfigured(CLIENT_ERROR_MESSAGE.format(name))
-        return client_name
+        return self.api_credentials.private_key
 
 
 # encodings available when encoding signed request payload
