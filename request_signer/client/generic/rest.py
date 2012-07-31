@@ -19,6 +19,11 @@ class BaseDjangoRestClient(Client):
       /api/endpoint/<company>/             # returns list of items for the company
       /api/endpoint/<company>/<service>/   # returns single item for company
 
+
+    Django doesn't handle post data properly when the request is a "PUT", or
+    anything other than "POST" really. So, for anything other than a GET or POST
+    we need to add a "_method=PUT" or equivalent, which is how the django rest framework
+    gets around this issue, but still uses full rest methods.
     """
 
     BASE_API_ENDPOINT = None
@@ -96,7 +101,8 @@ class BaseDjangoRestClient(Client):
             JSON representation of item on success, raises exception on error
         """
         endpoint = self.build_endpoint(group_key, item_key)
-        r = self._get_json_response("PUT", endpoint, data=attrs)
+        attrs["_method"] = "PUT"
+        r = self._get_json_response("POST", endpoint, data=attrs)
         if not r.is_successful:
             raise WebException(r.read())
         return r.json
@@ -113,7 +119,8 @@ class BaseDjangoRestClient(Client):
             exist so there is nothing to delete and we let it slide.
         """
         endpoint = self.build_endpoint(group_key, item_key)
-        r = self._get_json_response("DELETE", endpoint)
+        attrs = {"_method": "DELETE"}
+        r = self._get_json_response("POST", endpoint, data=attrs)
         if not r.is_successful and r.status_code != 404:
             raise WebException(r.read())
         return r.json

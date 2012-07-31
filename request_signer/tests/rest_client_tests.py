@@ -122,7 +122,9 @@ class BaseDjangoRestClientTests(test.TestCase):
         data = {'some_data': 'to send'}
         with mock.patch.object(self.sut, "_get_json_response") as get_response:
             self.sut.update("1234", "pk-3", **data)
-        get_response.assert_called_once_with("PUT", "/api/1234/pk-3/", data=data)
+
+        expected_data = dict(data, _method="PUT")
+        get_response.assert_called_once_with("POST", "/api/1234/pk-3/", data=expected_data)
 
     def test_update_returns_json_response_when_successful(self):
         response = self.get_mock_response()
@@ -146,7 +148,7 @@ class BaseDjangoRestClientTests(test.TestCase):
     def test_delete_issues_get_json_response_for_endpoint(self):
         with mock.patch.object(self.sut, "_get_json_response") as get_response:
             self.sut.delete("1234", "pk-3")
-        get_response.assert_called_once_with("DELETE", "/api/1234/pk-3/")
+        get_response.assert_called_once_with("POST", "/api/1234/pk-3/", data={"_method": "DELETE"})
 
     def test_delete_returns_json_response_when_successful(self):
         response = self.get_mock_response()
