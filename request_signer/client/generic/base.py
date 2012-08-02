@@ -1,10 +1,10 @@
 
 import json
+from urllib import urlencode
 import urllib2
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.http import urlencode
 
 import apysigner
 
@@ -97,7 +97,8 @@ class Client(object):
 
 # encodings available when encoding signed request payload
 def default_encoding(raw_data):
-    return urlencode(raw_data)
+    return urlencode(raw_data, doseq=True)
+
 
 def json_encoding(raw_data):
     return json.dumps(raw_data)
