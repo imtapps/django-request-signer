@@ -85,7 +85,7 @@ def signature_required(func):
         if request.META.get('CONTENT_TYPE') == 'application/json':
             request_data = json.loads(request.raw_post_data)
         else:
-            request_data = request.POST or None
+            request_data = dict(request.POST) or None
         return request_data
 
     _wrap.signature_required = True

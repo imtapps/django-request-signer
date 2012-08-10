@@ -141,7 +141,6 @@ class SignedRequestTests(test.TestCase):
 
         self.assertEqual("No JSON object could be decoded", context.exception.message)
 
-
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_post_data(self, get_signature):
         get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
@@ -157,6 +156,25 @@ class SignedRequestTests(test.TestCase):
         signed_view(request)
 
         get_signature.assert_called_once_with(client.private_key, request.get_full_path(), request.POST)
+
+    @mock.patch('apysigner.get_signature')
+    def test_does_not_create_signature_with_multivalue_dict_to_prevent_data_loss(self, get_signature):
+        get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+
+        url = '/my/path/?'
+        url += constants.SIGNATURE_PARAM_NAME + '=4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+        url += "&" + constants.CLIENT_ID_PARAM_NAME + "=" + client.client_id
+
+        request = test.client.RequestFactory().post(url, data={
+            'usernames': ['t1', 't2', 't3']})
+        signed_view = signature_required(self.view)
+        signed_view(request)
+
+        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), request.POST)
+        posted_data = get_signature.mock_calls[0][1][2]
+        self.assertEqual([('usernames', ['t1', 't2', 't3'])], posted_data.items())
 
     def test_signed_views_are_csrf_exempt(self):
         signed_view = signature_required(self.view)
