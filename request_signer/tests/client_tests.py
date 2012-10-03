@@ -12,8 +12,16 @@ from django import test
 from request_signer import constants
 from request_signer import models
 from request_signer.client.generic import Request, Response, Client
+from request_signer.client.generic import django_backend
 
 __all__ = ('ClientTests', 'ClientBackendTests', )
+
+
+class TestableClient(Client):
+
+    def __init__(self):
+        api_credentials = django_backend.DjangoSettingsApiCredentialsBackend(self)
+        super(TestableClient, self).__init__(api_credentials)
 
 class ClientTests(test.TestCase):
 
@@ -21,7 +29,7 @@ class ClientTests(test.TestCase):
         self.settings_name = 'SAMPLE_AUTH_DOMAIN'
         self.client_id_settings_name = 'SAMPLE_AUTH_CLIENT_ID'
         self.private_key_settings_name = 'SAMPLE_AUTH_PRIVATE_KEY'
-        self.client = Client()
+        self.client = TestableClient()
         self.domain = 'http://www.sample.com'
         self.path = '/some/path/'
         self.url = self.domain + self.path
@@ -195,17 +203,3 @@ class ClientBackendTests(test.TestCase):
         self.assertEqual(X.base_url, client._base_url)
         self.assertEqual(X.client_id, client._client_id)
         self.assertEqual(X.private_key, client._private_key)
-
-    @override_settings(TEST_DOMAIN='my_domain')
-    @override_settings(TEST_CLIENT_ID='my_client_id')
-    @override_settings(TEST_PRIVATE_KEY='my_private_key')
-    def test_uses_django_settings_by_default_for_api_credentials(self):
-        class TestClient(Client):
-            domain_settings_name = 'TEST_DOMAIN'
-            client_id_settings_name = 'TEST_CLIENT_ID'
-            private_key_settings_name = 'TEST_PRIVATE_KEY'
-
-        client = TestClient()
-        self.assertEqual('my_domain', client._base_url)
-        self.assertEqual('my_client_id', client._client_id)
-        self.assertEqual('my_private_key', client._private_key)

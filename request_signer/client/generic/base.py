@@ -1,10 +1,6 @@
-
 import json
 from urllib import urlencode
 import urllib2
-
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
 import apysigner
 
@@ -19,8 +15,6 @@ __all__ = (
     'SignedRequestFactory',
 )
 
-CLIENT_ERROR_MESSAGE = "Client implementations must define a `{0}` attribute"
-CLIENT_SETTINGS_ERROR_MESSAGE = "Settings must contain a `{0}` attribute"
 
 class WebException(Exception):
     """
@@ -31,7 +25,10 @@ class HttpMethodNotAllowed(Exception):
     pass
 
 
-class SettingsApiCredentialsBackend(object):
+class BasicSettingsApiCredentialsBackend(object):
+
+    CLIENT_ERROR_MESSAGE = "Client implementations must define a `{0}` attribute"
+    CLIENT_SETTINGS_ERROR_MESSAGE = "Settings must contain a `{0}` attribute"
 
     def __init__(self, client):
         self.client = client
@@ -49,23 +46,16 @@ class SettingsApiCredentialsBackend(object):
         return self.get_setting('private_key_settings_name')
 
     def get_setting(self, name):
-        client_name = self.get_client_name(name)
-        setting = getattr(settings, client_name, None)
-        if not setting:
-            raise ImproperlyConfigured(CLIENT_SETTINGS_ERROR_MESSAGE.format(client_name))
-        return setting
+        raise NotImplementedError
 
     def get_client_name(self, name):
-        client_name = getattr(self.client, name, None)
-        if not client_name:
-            raise ImproperlyConfigured(CLIENT_ERROR_MESSAGE.format(name))
-        return client_name
+        raise NotImplementedError
 
 
 class Client(object):
 
-    def __init__(self, api_credentials=None):
-        self.api_credentials = api_credentials or SettingsApiCredentialsBackend(self)
+    def __init__(self, api_credentials):
+        self.api_credentials = api_credentials
 
     def _get_response(self, http_method, endpoint, data=None, **request_kwargs):
         try:
