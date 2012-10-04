@@ -14,3 +14,6 @@ example.db
 dist/*
 
 doc/build/*
+
+.ctags
+.ropeproject/*

@@ -28,8 +28,8 @@ class BaseDjangoRestClient(Client):
     """
 
 
-    def __init__(self):
-        api_credentials = django_backend.DjangoSettingsApiCredentialsBackend(self)
+    def __init__(self, api_credentials=None):
+        api_credentials = api_credentials or django_backend.DjangoSettingsApiCredentialsBackend(self)
         super(BaseDjangoRestClient, self).__init__(api_credentials)
 
     BASE_API_ENDPOINT = None

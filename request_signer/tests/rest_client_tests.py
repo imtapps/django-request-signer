@@ -4,7 +4,7 @@ import mock
 from django import test
 from request_signer.client.generic import Response, WebException
 
-
+from django.test.utils import override_settings
 from request_signer.client.generic.rest import BaseDjangoRestClient
 
 
@@ -174,3 +174,37 @@ class BaseDjangoRestClientTests(test.TestCase):
             with self.assertRaises(WebException) as e:
                 self.sut.delete("1234", "pk-3")
         self.assertEqual(response.read.return_value, e.exception.message)
+
+
+class BaseDjangoRestClientInitTests(test.TestCase):
+
+    @override_settings(TEST_DOMAIN='my_domain')
+    @override_settings(TEST_CLIENT_ID='my_client_id')
+    @override_settings(TEST_PRIVATE_KEY='my_private_key')
+    def test_uses_django_settings_by_default_for_api_credentials(self):
+        class SomeClient(BaseDjangoRestClient):
+            domain_settings_name = 'TEST_DOMAIN'
+            client_id_settings_name = 'TEST_CLIENT_ID'
+            private_key_settings_name = 'TEST_PRIVATE_KEY'
+
+        rest_client = SomeClient()
+
+        self.assertEqual('my_domain', rest_client._base_url)
+        self.assertEqual('my_client_id', rest_client._client_id)
+        self.assertEqual('my_private_key', rest_client._private_key)
+
+    def test_will_use_provided_settings_when_available(self):
+        class SomeProvider(object):
+            base_url="my_domain"
+            client_id="my_client_id"
+            private_key="my_private_key"
+
+        class SomeClient(BaseDjangoRestClient):
+            pass
+
+        provider = SomeProvider()
+        rest_client = SomeClient(provider)
+
+        self.assertEqual('my_domain', rest_client._base_url)
+        self.assertEqual('my_client_id', rest_client._client_id)
+        self.assertEqual('my_private_key', rest_client._private_key)
