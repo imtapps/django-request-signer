@@ -1,6 +1,4 @@
-
-from request_signer.client.generic import Client, WebException
-from request_signer.client.generic import django_backend
+from request_signer.client.generic import Client, WebException, django_backend
 
 
 __all__ = (

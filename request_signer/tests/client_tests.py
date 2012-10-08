@@ -2,7 +2,6 @@
 from cStringIO import StringIO
 import json
 import urllib2
-from django.test.utils import override_settings
 import mock
 
 from django.conf import settings
@@ -11,8 +10,7 @@ from django import test
 
 from request_signer import constants
 from request_signer import models
-from request_signer.client.generic import Request, Response, Client
-from request_signer.client.generic import django_backend
+from request_signer.client.generic import Client, Response, Request, django_backend
 
 __all__ = ('ClientTests', 'ClientBackendTests', )
 
@@ -83,7 +81,7 @@ class ClientTests(test.TestCase):
             getattr(self.client, client_property)
         self.assertIn(settings_name, error.exception.message)
 
-    @mock.patch('request_signer.client.generic.base.Request')
+    @mock.patch('generic_request_signer.request.Request')
     def test_get_response_creates_request(self, request):
         method = 'GET'
         data = dict(this="is", some='data', right='here')
@@ -101,7 +99,7 @@ class ClientTests(test.TestCase):
             **request_kwargs
         )
 
-    @mock.patch('request_signer.client.generic.base.Request')
+    @mock.patch('generic_request_signer.request.Request')
     def test_get_response_creates_request_with_json_payload(self, request):
         method = 'POST'
         data = dict(this="is", some='data', right='here')
@@ -165,7 +163,7 @@ class ClientTests(test.TestCase):
     def test_private_key_property_returns_private_key_from_settings(self):
         self.assertEqual(self.private_key, self.client._private_key)
 
-    @mock.patch('request_signer.client.generic.base.Request')
+    @mock.patch('generic_request_signer.request.Request')
     def test_get_raw_response_invokes_urlopen_with_request(self, request):
         self.get_response()
         self.urlopen.assert_called_once_with(request.return_value)

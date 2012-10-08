@@ -1,4 +1,4 @@
 
 Django
 south
-apysigner
+generic-request-signer
