@@ -1,4 +1,4 @@
 
 Django
 south
-generic-request-signer
+generic-request-signer>=0.0.7
