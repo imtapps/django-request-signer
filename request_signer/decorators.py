@@ -1,6 +1,6 @@
 import functools
 import json
-
+from django.conf import settings
 from django import http
 from django.views.decorators.csrf import csrf_exempt
 from generic_request_signer.check_signature import check_signature
@@ -28,23 +28,26 @@ def signature_required(func):
           - no client
           - signature doesnt match
         """
+        if has_valid_signature(request) or allow_unsigned_requests():
+            return func(request, *args, **kwargs)
+        else:
+            return http.HttpResponseBadRequest()
+
+    def allow_unsigned_requests():
+        return getattr(settings, 'ALLOW_UNSIGNED_REQUESTS', False)
+
+    def has_valid_signature(request):
         signature = request.GET.get(constants.SIGNATURE_PARAM_NAME)
         client_id = request.GET.get(constants.CLIENT_ID_PARAM_NAME)
 
         if not signature or not client_id:
-            return http.HttpResponseBadRequest()
+            return False
 
-        signature_valid = False
         client = models.AuthorizedClient.get_by_client(client_id)
         if client:
             url_path = request.get_full_path()
             request_data = get_request_data(request)
-            signature_valid = check_signature(signature, client.private_key, url_path, request_data)
-
-        if signature_valid:
-            return func(request, *args, **kwargs)
-        else:
-            return http.HttpResponseBadRequest()
+            return check_signature(signature, client.private_key, url_path, request_data)
 
     def get_request_data(request):
         if request.META.get('CONTENT_TYPE') == 'application/json':

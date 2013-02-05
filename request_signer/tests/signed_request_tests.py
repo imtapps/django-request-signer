@@ -3,6 +3,7 @@ import mock
 
 from django import test
 from django import http
+from django.test.utils import override_settings
 
 from request_signer import  models, constants
 from request_signer.decorators import signature_required
@@ -178,3 +179,17 @@ class SignedRequestTests(test.TestCase):
     def test_signed_views_are_csrf_exempt(self):
         signed_view = signature_required(self.view)
         self.assertTrue(getattr(signed_view, 'csrf_exempt', False))
+
+    @mock.patch('apysigner.get_signature')
+    @override_settings(ALLOW_UNSIGNED_REQUESTS=True)
+    def test_returns_200_when_signature_doesnt_match_but_allow_unsigned_is_true(self, get_signature):
+        get_signature.return_value = 'ABCDEFGHIJKLMNOPQRSTUVWXYZFtYkCdi4XAc-vOLtI='
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        request = self.get_request(data={
+            constants.SIGNATURE_PARAM_NAME: 'YQ==',
+            constants.CLIENT_ID_PARAM_NAME: client.client_id,
+        })
+        signed_view = signature_required(self.view)
+        response = signed_view(request)
+        self.assertEqual(200, response.status_code)
