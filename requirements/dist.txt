@@ -1,4 +1,3 @@
-
-Django
+Django<1.5
 south
 generic-request-signer>=0.0.7
