@@ -1,11 +1,12 @@
-import functools
 import json
-from django.conf import settings
+import functools
+
 from django import http
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from generic_request_signer.check_signature import check_signature
 
-from request_signer import  constants, models
+from request_signer import constants, models
 
 
 def signature_required(func):
@@ -33,28 +34,31 @@ def signature_required(func):
         else:
             return http.HttpResponseBadRequest()
 
-    def allow_unsigned_requests():
-        return getattr(settings, 'ALLOW_UNSIGNED_REQUESTS', False)
-
-    def has_valid_signature(request):
-        signature = request.GET.get(constants.SIGNATURE_PARAM_NAME)
-        client_id = request.GET.get(constants.CLIENT_ID_PARAM_NAME)
-
-        if not signature or not client_id:
-            return False
-
-        client = models.AuthorizedClient.get_by_client(client_id)
-        if client:
-            url_path = request.get_full_path()
-            request_data = get_request_data(request)
-            return check_signature(signature, client.private_key, url_path, request_data)
-
-    def get_request_data(request):
-        if request.META.get('CONTENT_TYPE') == 'application/json':
-            request_data = json.loads(request.raw_post_data)
-        else:
-            request_data = dict(request.POST) or None
-        return request_data
-
     _wrap.signature_required = True
     return _wrap
+
+
+def allow_unsigned_requests():
+    return getattr(settings, 'ALLOW_UNSIGNED_REQUESTS', False)
+
+
+def has_valid_signature(request):
+    signature = request.GET.get(constants.SIGNATURE_PARAM_NAME)
+    client_id = request.GET.get(constants.CLIENT_ID_PARAM_NAME)
+
+    if not signature or not client_id:
+        return False
+
+    client = models.AuthorizedClient.get_by_client(client_id)
+    if client:
+        url_path = request.get_full_path()
+        request_data = get_request_data(request)
+        return check_signature(signature, client.private_key, url_path, request_data)
+
+
+def get_request_data(request):
+    if request.META.get('CONTENT_TYPE') == 'application/json':
+        request_data = json.loads(request.raw_post_data)
+    else:
+        request_data = dict(request.POST) or None
+    return request_data
