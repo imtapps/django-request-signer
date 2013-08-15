@@ -6,7 +6,9 @@ from django import http
 from django.test.utils import override_settings
 
 from request_signer import  models, constants
-from request_signer.decorators import signature_required
+from request_signer.validator import SignatureValidator
+from request_signer.decorators import signature_required, has_valid_signature
+
 
 __all__ = (
     'SignedRequestTests',
@@ -14,15 +16,9 @@ __all__ = (
 
 
 class SignedRequestTests(test.TestCase):
-    """
-    Tests for the signature_required decorator.
-    """
 
     @property
     def view(self):
-        """
-        A fake view that returns a proper 200 response.
-        """
         return lambda request, *args, **kwargs: http.HttpResponse("Completed Test View!")
 
     def get_request(self, data=None):
@@ -74,6 +70,67 @@ class SignedRequestTests(test.TestCase):
         signed_view = signature_required(self.view)
         response = signed_view(request)
         self.assertEqual(200, response.status_code)
+
+    @mock.patch('request_signer.signals.successful_signed_request.send')
+    @mock.patch('apysigner.get_signature')
+    def test_fires_successful_signed_request_signal_from_signature_required_decorator(self, get_signature, send_signal):
+        get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        request = self.get_request(data={
+            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+            constants.CLIENT_ID_PARAM_NAME: client.client_id,
+        })
+
+        instance = SignatureValidator(request)
+        with mock.patch('request_signer.decorators.get_validator', mock.Mock(return_value=instance)):
+            signed_view = signature_required(self.view)
+            response = signed_view(request)
+        self.assertEqual(200, response.status_code)
+        send_signal.assert_called_once_with(sender=instance, request=request)
+
+    @mock.patch('request_signer.signals.successful_signed_request.send')
+    @mock.patch('apysigner.get_signature')
+    def test_fires_successful_signed_request_signal_from_has_valid_signature(self, get_signature, send_signal):
+        get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        request = self.get_request(data={
+            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+            constants.CLIENT_ID_PARAM_NAME: client.client_id,
+        })
+        instance = SignatureValidator(request)
+        with mock.patch('request_signer.decorators.get_validator', mock.Mock(return_value=instance)):
+            self.assertTrue(has_valid_signature(request))
+        send_signal.assert_called_once_with(sender=instance, request=request)
+
+    @mock.patch('request_signer.signals.successful_signed_request.send')
+    @mock.patch('apysigner.get_signature')
+    def test_does_not_fire_successful_signed_request_signal_from_signature_required_when_invalid_signature(self, get_signature, send_signal):
+        get_signature.return_value = 'ABCDEFGHIJKLMNOPQRSTUVWXYZFtYkCdi4XAc-vOLtI='
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        request = self.get_request(data={
+            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+            constants.CLIENT_ID_PARAM_NAME: client.client_id,
+        })
+        signed_view = signature_required(self.view)
+        response = signed_view(request)
+        self.assertEqual(400, response.status_code)
+        self.assertFalse(send_signal.called)
+
+    @mock.patch('request_signer.signals.successful_signed_request.send')
+    @mock.patch('apysigner.get_signature')
+    def test_does_not_fire_successful_signed_request_signal_from_has_valid_signature_when_invalid_signature(self, get_signature, send_signal):
+        get_signature.return_value = 'ABCDEFGHIJKLMNOPQRSTUVWXYZFtYkCdi4XAc-vOLtI='
+
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        request = self.get_request(data={
+            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+            constants.CLIENT_ID_PARAM_NAME: client.client_id,
+        })
+        self.assertFalse(has_valid_signature(request))
+        self.assertFalse(send_signal.called)
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_get_data(self, get_signature):
