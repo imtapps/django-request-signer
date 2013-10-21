@@ -48,6 +48,8 @@ class SignatureValidator(object):
     def request_data(self):
         if self.request.META.get('CONTENT_TYPE') == 'application/json':
             request_data = json.loads(self.request.raw_post_data)
-        else:
+        elif self.request.method.lower() == 'post':
             request_data = dict(self.request.POST) or None
+        else:
+            request_data = self.request.body or None
         return request_data
