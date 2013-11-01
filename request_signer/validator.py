@@ -1,5 +1,6 @@
 import json
 
+from django.http import QueryDict
 from django.utils.functional import cached_property
 from generic_request_signer.check_signature import check_signature
 
@@ -48,8 +49,8 @@ class SignatureValidator(object):
     def request_data(self):
         if self.request.META.get('CONTENT_TYPE') == 'application/json':
             request_data = json.loads(self.request.raw_post_data)
-        elif self.request.method.lower() == 'post':
-            request_data = dict(self.request.POST) or None
+        elif self.request.method.lower() == 'patch':
+            request_data = QueryDict(self.request.raw_post_data, encoding='utf-8')
         else:
-            request_data = self.request.body or None
+            request_data = dict(self.request.POST) or None
         return request_data

@@ -259,3 +259,9 @@ class SignedRequestTests(test.TestCase):
         validator1 = SignatureValidator(request)
         validator2 = SignatureValidator(request_without_data)
         self.assertNotEqual(validator1.request_data, validator2.request_data)
+
+    def test_patch_requests_return_dict_of_multipart_form_data(self):
+        request = test.client.RequestFactory().post('/asdf/', data={
+            'usernames': ['t1', 't2', 't3']}, **{'REQUEST_METHOD': "PATCH"})
+        expected = {u'--BoUnDaRyStRiNg\r\nContent-Disposition: form-data': [u''], u' name': [u'"usernames"\r\n\r\nt1\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data', u'"usernames"\r\n\r\nt2\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data', u'"usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n']}
+        self.assertEqual(expected, SignatureValidator(request).request_data)
