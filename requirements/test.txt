@@ -1,5 +1,6 @@
--r dist.txt
-
+south
+generic-request-signer>=0.0.8
+tox
 mock
 django-nose
 nosexcover
@@ -8,5 +9,3 @@ coverage
 pyflakes
 pep8
 lettuce
-
-pycharm_testrunner
