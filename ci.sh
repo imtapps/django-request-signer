@@ -24,4 +24,3 @@ if [ $EXIT -gt 1 ]; then
     echo "Exiting Build with status:" $EXIT
     exit $EXIT
 fi
-~
