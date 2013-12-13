@@ -9,7 +9,7 @@ VIRTUALENV_NAME=$1
 virtualenv $VIRTUALENV_NAME
 . $VIRTUALENV_NAME/bin/activate
 rm -rf .tox
-pip install tox
+pip install tox flake8
 
 tox
 TOX_EXIT=$?
