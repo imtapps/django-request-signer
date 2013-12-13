@@ -48,9 +48,9 @@ class SignatureValidator(object):
     @property
     def request_data(self):
         if self.request.META.get('CONTENT_TYPE') == 'application/json':
-            request_data = json.loads(self.request.raw_post_data)
+            request_data = json.loads(self.request.body)
         elif self.request.method.lower() == 'patch':
-            request_data = QueryDict(self.request.raw_post_data, encoding='utf-8')
+            request_data = QueryDict(self.request.body, encoding='utf-8')
         else:
             request_data = dict(self.request.POST) or None
         return request_data

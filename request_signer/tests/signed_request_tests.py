@@ -157,7 +157,8 @@ class SignedRequestTests(test.TestCase):
             constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
             constants.CLIENT_ID_PARAM_NAME: client.client_id,
         })
-        del request.META['CONTENT_TYPE']
+        if 'CONTENT_TYPE' in request.META:
+            del request.META['CONTENT_TYPE']
         signed_view = signature_required(self.view)
         signed_view(request)
 
