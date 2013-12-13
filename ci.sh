@@ -1,39 +1,27 @@
 #!/bin/bash
 
-# verify user provided a name for the virtualenv
 if [ -z "$1" ]; then
     echo "usage: $0 virtual_env_name"
     exit
 fi
-
 VIRTUALENV_NAME=$1
 
 virtualenv $VIRTUALENV_NAME
 . $VIRTUALENV_NAME/bin/activate
+rm -rf .tox
+pip install tox
 
-find . -name "*.pyc" -delete
+tox
+TOX_EXIT=$?
 
-pip install -r requirements/test.txt
+flake8 request_signer --max-line-length=120 --max-complexity=5 | grep -Pv '(base|__init__).py:\d+:\d+:\sF401' > flake8.txt
+FLAKE8_EXIT=`cat flake8.txt | wc -l`
 
-python example/manage.py test --with-xunit --with-xcover --cover-package=request_signer
-TEST_EXIT=$?
-rm -rf jenkins_reports
-mkdir jenkins_reports
-pep8 request_signer > jenkins_reports/pep8.report
-PEP8_EXIT=$?
-pyflakes request_signer > jenkins_reports/pyflakes.report
-PYFLAKES_EXIT=$?
-
-# cleanup virtualenv
-deactivate
-rm -rf $VIRTUALENV_NAME
-
-let JENKINS_EXIT="$TEST_EXIT + $PEP8_EXIT + $PYFLAKES_EXIT"
-if [ $JENKINS_EXIT -gt 2 ]; then
-    echo "Test exit status:" $TEST_EXIT
-    echo "PEP8 exit status:" $PEP8_EXIT
-    echo "Pyflakes exit status:" $PYFLAKES_EXIT
+EXIT=`expr $TOX_EXIT + $FLAKE8_EXIT`
+if [ $EXIT -gt 1 ]; then
+    echo "Tox exit status:" $TOX_EXIT
+    echo "FLAKE8 exit status:" $FLAKE8_EXIT
     echo "Exiting Build with status:" $EXIT
-    exit $JENKINS_EXIT
+    exit $EXIT
 fi
-
+~

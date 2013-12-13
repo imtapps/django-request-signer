@@ -1,6 +1,7 @@
 from django import http
 from django.views.generic.base import View
 
+
 class SampleView(View):
 
     def get(self, request):

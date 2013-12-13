@@ -16,7 +16,7 @@ def monkey_patch_for_multi_threaded():
 
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "example.settings")
 
     from django.core.management import execute_from_command_line
     monkey_patch_for_multi_threaded()

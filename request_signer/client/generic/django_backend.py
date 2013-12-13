@@ -3,8 +3,6 @@ from request_signer.client.generic.base import BasicSettingsApiCredentialsBacken
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-__all__ = ('DjangoSettingsApiCredentialsBackend')
-
 
 class DjangoSettingsApiCredentialsBackend(BasicSettingsApiCredentialsBackend):
 
@@ -20,5 +18,3 @@ class DjangoSettingsApiCredentialsBackend(BasicSettingsApiCredentialsBackend):
         if not client_name:
             raise ImproperlyConfigured(self.CLIENT_ERROR_MESSAGE.format(name))
         return client_name
-
-

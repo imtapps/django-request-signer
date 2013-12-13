@@ -7,9 +7,6 @@ from django.core.management.base import CommandError
 from request_signer.management.commands import createclient
 from request_signer.models import create_private_key, AuthorizedClient
 
-__all__ = (
-    "CreateClientTests",
-)
 
 class CreateClientTests(test.TestCase):
 
@@ -43,4 +40,3 @@ class CreateClientTests(test.TestCase):
         c = AuthorizedClient.objects.get(client_id="client")
         self.assertEqual("some private key", c.private_key)
         create_private_key.assert_called_once_with()
-

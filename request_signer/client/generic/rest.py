@@ -1,11 +1,6 @@
 from request_signer.client.generic import Client, WebException, django_backend
 
 
-__all__ = (
-    "BaseDjangoRestClient",
-)
-
-
 class BaseDjangoRestClient(Client):
     """
     Base Client for working with an api server using djangorestframework.
@@ -24,7 +19,6 @@ class BaseDjangoRestClient(Client):
     we need to add a "_method=PUT" or equivalent, which is how the django rest framework
     gets around this issue, but still uses full rest methods.
     """
-
 
     def __init__(self, api_credentials=None):
         api_credentials = api_credentials or django_backend.DjangoSettingsApiCredentialsBackend(self)

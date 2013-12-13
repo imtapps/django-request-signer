@@ -7,6 +7,7 @@ import time
 
 from django.db import models
 
+
 def create_private_key():
     """
     Creates new private key to be used for signing requests.
@@ -26,6 +27,9 @@ class AuthorizedClient(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    class Meta(object):
+        app_label = 'request_signer'
+
     @classmethod
     def get_by_client(cls, client_id):
         try:
@@ -44,3 +48,4 @@ class AuthorizedServiceProvider(models.Model):
 
     class Meta(object):
         abstract = True
+        app_label = 'request_signer'

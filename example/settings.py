@@ -1,10 +1,4 @@
-import sys
-from os.path import abspath, dirname, join
-parent = abspath(dirname(__file__))
-grandparent = abspath(join(parent, '..'))
-for p in (grandparent, parent):
-    if p not in sys.path:
-        sys.path.insert(0, p)
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -70,8 +64,12 @@ INSTALLED_APPS = (
     'lettuce.django',
 ) + PROJECT_APPS
 
-
-PYLINT_RCFILE = join(parent, 'pylint.rc')
+LETTUCE_APPS = (
+    'request_signer',
+)
+LETTUCE_AVOID_APPS = (
+    'south',
+)
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 SOUTH_TESTS_MIGRATE = False

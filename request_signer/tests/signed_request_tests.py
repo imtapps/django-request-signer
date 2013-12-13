@@ -5,14 +5,9 @@ from django import test
 from django import http
 from django.test.utils import override_settings
 
-from request_signer import  models, constants
+from request_signer import models, constants
 from request_signer.validator import SignatureValidator
 from request_signer.decorators import signature_required, has_valid_signature
-
-
-__all__ = (
-    'SignedRequestTests',
-)
 
 
 class SignedRequestTests(test.TestCase):
@@ -38,7 +33,7 @@ class SignedRequestTests(test.TestCase):
 
     def test_returns_400_response_when_request_doesnt_have_client_id_in_data(self):
         request = self.get_request(data={
-            constants.SIGNATURE_PARAM_NAME:'4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
         })
 
         signed_view = signature_required(self.view)
@@ -106,7 +101,7 @@ class SignedRequestTests(test.TestCase):
 
     @mock.patch('request_signer.signals.successful_signed_request.send')
     @mock.patch('apysigner.get_signature')
-    def test_does_not_fire_successful_signed_request_signal_from_signature_required_when_invalid_signature(self, get_signature, send_signal):
+    def test_does_not_fire_successful_signal_from_signature_required_when_invalid(self, get_signature, send_signal):
         get_signature.return_value = 'ABCDEFGHIJKLMNOPQRSTUVWXYZFtYkCdi4XAc-vOLtI='
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
@@ -121,7 +116,7 @@ class SignedRequestTests(test.TestCase):
 
     @mock.patch('request_signer.signals.successful_signed_request.send')
     @mock.patch('apysigner.get_signature')
-    def test_does_not_fire_successful_signed_request_signal_from_has_valid_signature_when_invalid_signature(self, get_signature, send_signal):
+    def test_does_not_fire_successful_signal_from_has_valid_signature_when_invalid(self, get_signature, send_signal):
         get_signature.return_value = 'ABCDEFGHIJKLMNOPQRSTUVWXYZFtYkCdi4XAc-vOLtI='
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
@@ -264,5 +259,10 @@ class SignedRequestTests(test.TestCase):
     def test_patch_requests_return_dict_of_multipart_form_data(self):
         request = test.client.RequestFactory().post('/asdf/', data={
             'usernames': ['t1', 't2', 't3']}, **{'REQUEST_METHOD': "PATCH"})
-        expected = {u'--BoUnDaRyStRiNg\r\nContent-Disposition: form-data': [u''], u' name': [u'"usernames"\r\n\r\nt1\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data', u'"usernames"\r\n\r\nt2\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data', u'"usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n']}
+        expected = {
+            u'--BoUnDaRyStRiNg\r\nContent-Disposition: form-data': [u''],
+            u' name': [
+                u'"usernames"\r\n\r\nt1\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
+                u'"usernames"\r\n\r\nt2\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
+                u'"usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n']}
         self.assertEqual(expected, SignatureValidator(request).request_data)

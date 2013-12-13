@@ -195,9 +195,9 @@ class BaseDjangoRestClientInitTests(test.TestCase):
 
     def test_will_use_provided_settings_when_available(self):
         class SomeProvider(object):
-            base_url="my_domain"
-            client_id="my_client_id"
-            private_key="my_private_key"
+            base_url = "my_domain"
+            client_id = "my_client_id"
+            private_key = "my_private_key"
 
         class SomeClient(BaseDjangoRestClient):
             pass

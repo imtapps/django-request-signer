@@ -3,6 +3,7 @@ from django.utils import unittest
 from request_signer.client.generic import Client
 from request_signer.client.generic.django_client import DjangoClient
 
+
 class DjangoClientTests(unittest.TestCase):
 
     sut_class = DjangoClient

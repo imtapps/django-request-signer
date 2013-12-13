@@ -2,8 +2,10 @@
 *.pyc
 *.pyo
 .tox/
-
+*.xml
+.coverage
 .idea/*
+flake8.txt
 
 jenkins_reports/*
 reports/*

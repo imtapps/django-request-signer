@@ -3,9 +3,8 @@ import httplib
 import json
 import mock
 from django.utils import unittest
-from request_signer.client.generic import  Response
+from request_signer.client.generic import Response
 
-__all__ = ('ResponseTests', )
 
 class ResponseTests(unittest.TestCase):
 
@@ -38,7 +37,8 @@ class ResponseTests(unittest.TestCase):
         statuses = (status for status in httplib.responses.keys() if include_status(status))
         for response_code in statuses:
             value = self.response._evaluate_response_code_for_success(response_code)
-            self.assertEqual(expected, value, "it seems '%s' returned '%s' for some odd reason" % (response_code, value))
+            message = "it seems '%s' returned '%s' for some odd reason" % (response_code, value)
+            self.assertEqual(expected, value, message)
 
     def test_status_code_returns_status_code_from_raw_response(self):
         self.raw_response.code = 201
@@ -58,4 +58,3 @@ class ResponseTests(unittest.TestCase):
         self.response.raw_response = StringIO(data)
         self.assertEqual(expected, self.response.json)
         self.assertEqual(expected, self.response.json)
-

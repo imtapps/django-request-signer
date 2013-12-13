@@ -12,14 +12,13 @@ from request_signer import constants
 from request_signer import models
 from request_signer.client.generic import Client, Response, Request, django_backend
 
-__all__ = ('ClientTests', 'ClientBackendTests', )
-
 
 class TestableClient(Client):
 
     def __init__(self):
         api_credentials = django_backend.DjangoSettingsApiCredentialsBackend(self)
         super(TestableClient, self).__init__(api_credentials)
+
 
 class ClientTests(test.TestCase):
 
@@ -95,7 +94,7 @@ class ClientTests(test.TestCase):
             'my_url?{0}={1}&this=is&right=here&some=data&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
                 constants.SIGNATURE_PARAM_NAME, 'JjZFNxsw8HRZnuMlqGr_U4kLU_yHXxPpSm-3mbPdj9g='),
-            None, # data
+            None,
             **request_kwargs
         )
 
@@ -180,6 +179,7 @@ class ClientTests(test.TestCase):
         self.assertIsInstance(error_as_response, Response)
         self.assertEqual(expected, error_as_response.raw_response)
 
+
 class ClientBackendTests(test.TestCase):
 
     def test_uses_api_credentials_from_authorized_service_provider_model(self):
@@ -192,9 +192,9 @@ class ClientBackendTests(test.TestCase):
 
     def test_uses_api_credentials_from_object_that_implements_api_credential_attributes(self):
         class X(object):
-            base_url="my_url"
-            client_id="my_id"
-            private_key="my_key"
+            base_url = "my_url"
+            client_id = "my_id"
+            private_key = "my_key"
 
         client = Client(api_credentials=X)
 
