@@ -48,4 +48,3 @@ class AuthorizedServiceProvider(models.Model):
 
     class Meta(object):
         abstract = True
-        app_label = 'request_signer'
