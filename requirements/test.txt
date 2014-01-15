@@ -1,5 +1,5 @@
 south
-generic-request-signer>=0.0.8
+generic-request-signer>=0.2.2
 tox
 mock
 django-nose

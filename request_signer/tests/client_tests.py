@@ -111,7 +111,7 @@ class ClientTests(test.TestCase):
             method,
             'my_url?{0}={1}&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, '0R98AGFfWDnkwL4phL3ET3PJa-GVcy5ZC2mJPOEJFFc='),
+                constants.SIGNATURE_PARAM_NAME, 'KO_460pcuN_3mRfPBpLnTO9DbojZ2hf8bcr4-aptkN0='),
             json.dumps(data),
             **request_kwargs
         )
