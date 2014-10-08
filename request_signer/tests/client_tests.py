@@ -86,14 +86,14 @@ class ClientTests(test.TestCase):
         data = dict(this="is", some='data', right='here')
         request_kwargs = {"headers": {"Accept": "application/json"}}
         with mock.patch.object(Client, '_get_service_url') as get_url:
-            get_url.return_value = 'my_url'
+            get_url.return_value = 'http://my_url'
             self.get_response(method, self.endpoint, data, **request_kwargs)
 
         request.assert_called_once_with(
             method,
-            'my_url?{0}={1}&this=is&right=here&some=data&{2}={3}'.format(
+            'http://my_url?{0}={1}&this=is&right=here&some=data&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, 'JjZFNxsw8HRZnuMlqGr_U4kLU_yHXxPpSm-3mbPdj9g='),
+                constants.SIGNATURE_PARAM_NAME, '4O7tEQEqpnoV6NKeiwRxgCA01yNbHAzVUjI1fYTlajA='),
             None,
             **request_kwargs
         )
@@ -104,21 +104,21 @@ class ClientTests(test.TestCase):
         data = dict(this="is", some='data', right='here')
         request_kwargs = dict(headers={"Content-Type": "application/json"})
         with mock.patch.object(Client, '_get_service_url') as get_url:
-            get_url.return_value = 'my_url'
+            get_url.return_value = 'http://my_url'
             self.get_response(method, self.endpoint, data, **request_kwargs)
 
         request.assert_called_once_with(
             method,
-            'my_url?{0}={1}&{2}={3}'.format(
+            'http://my_url?{0}={1}&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, 'KO_460pcuN_3mRfPBpLnTO9DbojZ2hf8bcr4-aptkN0='),
+                constants.SIGNATURE_PARAM_NAME, 'sdZFX_EhMFS6JclVejIJu_UgKHM7Z3HIRXZ8C_rXwQE='),
             json.dumps(data),
             **request_kwargs
         )
 
     def test_get_response_gets_url_with_endpoint(self):
         with mock.patch.object(Client, '_get_service_url') as get_url:
-            get_url.return_value = 'url'
+            get_url.return_value = 'http://url'
             self.get_response(endpoint=self.endpoint)
         get_url.assert_called_once_with(self.endpoint)
 
