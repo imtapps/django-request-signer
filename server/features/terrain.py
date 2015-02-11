@@ -3,12 +3,10 @@ from cStringIO import StringIO
 from lettuce import before, after, world
 from django.db import connection
 from django.core.management import call_command
-from south.management.commands import patch_for_test_db_setup
 
 
 @before.all
 def setup_test_database():
-    patch_for_test_db_setup()
     world.test_database_name = connection.creation.create_test_db(verbosity=0, autoclobber=True)
 
 

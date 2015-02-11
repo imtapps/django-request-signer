@@ -51,7 +51,6 @@ PROJECT_APPS = (
 )
 
 INSTALLED_APPS = (
-    'south',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -67,9 +66,5 @@ INSTALLED_APPS = (
 LETTUCE_APPS = (
     'request_signer',
 )
-LETTUCE_AVOID_APPS = (
-    'south',
-)
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-SOUTH_TESTS_MIGRATE = False

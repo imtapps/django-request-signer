@@ -1,4 +1,3 @@
-import json
 
 from django.http import QueryDict
 from django.utils.functional import cached_property
