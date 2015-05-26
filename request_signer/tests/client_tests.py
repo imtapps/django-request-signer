@@ -165,7 +165,7 @@ class ClientTests(test.TestCase):
     @mock.patch('generic_request_signer.request.Request')
     def test_get_raw_response_invokes_urlopen_with_request(self, request):
         self.get_response()
-        self.urlopen.assert_called_once_with(request.return_value)
+        self.urlopen.assert_called_once_with(request.return_value, timeout=15)
 
     def test_returns_raw_response_wrapped_with_response_object_when_urllib_works_as_expected(self):
         raw_response = self.get_response()
