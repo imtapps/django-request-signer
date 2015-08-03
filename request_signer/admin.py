@@ -14,6 +14,7 @@ class AuthorizedClientForm(forms.ModelForm):
 
     class Meta(object):
         model = AuthorizedClient
+        fields = ['private_key']
 
 
 class AuthorizedClientAdmin(admin.ModelAdmin):
