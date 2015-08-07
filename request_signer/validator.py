@@ -1,3 +1,4 @@
+from urllib import unquote
 
 from django.http import QueryDict
 from django.utils.functional import cached_property
@@ -35,7 +36,7 @@ class SignatureValidator(object):
 
     @property
     def url_path(self):
-        return self.request.get_full_path()
+        return unquote(self.request.get_full_path())
 
     @property
     def client(self):

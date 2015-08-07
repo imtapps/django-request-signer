@@ -1,5 +1,7 @@
 import json
 import mock
+from urllib import unquote
+import re
 
 from django import test
 from django import http
@@ -140,7 +142,9 @@ class SignedRequestTests(test.TestCase):
         signed_view = signature_required(self.view)
         signed_view(request)
 
-        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
+        call_url = unquote(request.get_full_path())
+        call_url = re.sub('&__signature=4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=', '', call_url)
+        get_signature.assert_called_once_with(client.private_key, call_url, None)
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_no_content_type(self, get_signature):
@@ -157,7 +161,9 @@ class SignedRequestTests(test.TestCase):
         signed_view = signature_required(self.view)
         signed_view(request)
 
-        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
+        call_url = unquote(request.get_full_path())
+        call_url = re.sub('&__signature=4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=', '', call_url)
+        get_signature.assert_called_once_with(client.private_key, call_url, None)
 
     @mock.patch('apysigner.get_signature')
     def test_json_is_properly_parsed_into_signature(self, get_signature):
@@ -174,7 +180,7 @@ class SignedRequestTests(test.TestCase):
         signed_view = signature_required(self.view)
         signed_view(request)
 
-        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), json_string)
+        get_signature.assert_called_once_with(client.private_key, unquote(request.get_full_path()), json_string)
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_post_data(self, get_signature):
@@ -190,7 +196,7 @@ class SignedRequestTests(test.TestCase):
         signed_view = signature_required(self.view)
         signed_view(request)
 
-        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), request.POST)
+        get_signature.assert_called_once_with(client.private_key, unquote(request.get_full_path()), request.POST)
 
     @mock.patch('apysigner.get_signature')
     def test_does_not_create_signature_with_multivalue_dict_to_prevent_data_loss(self, get_signature):
@@ -207,7 +213,7 @@ class SignedRequestTests(test.TestCase):
         signed_view = signature_required(self.view)
         signed_view(request)
 
-        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), request.POST)
+        get_signature.assert_called_once_with(client.private_key, unquote(request.get_full_path()), request.POST)
         posted_data = get_signature.mock_calls[0][1][2]
         self.assertEqual([('usernames', ['t1', 't2', 't3'])], posted_data.items())
 
