@@ -235,6 +235,15 @@ class SignedRequestTests(test.TestCase):
         response = signed_view(request)
         self.assertEqual(200, response.status_code)
 
+    def test_put_requests_still_use_request_body(self):
+        url = '/asdf/'
+        request = test.client.RequestFactory().post(url, data={
+            'usernames': ['t1', 't2', 't3']}, **{'REQUEST_METHOD': "PUT"})
+        request_without_data = test.client.RequestFactory().post(url, data={}, **{'REQUEST_METHOD': "PUT"})
+        validator1 = SignatureValidator(request)
+        validator2 = SignatureValidator(request_without_data)
+        self.assertNotEqual(validator1.request_data, validator2.request_data)
+
     def test_patch_requests_still_use_request_body(self):
         url = '/asdf/'
         request = test.client.RequestFactory().post(url, data={

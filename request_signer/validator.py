@@ -49,7 +49,7 @@ class SignatureValidator(object):
     def request_data(self):
         if self.request.META.get('CONTENT_TYPE') == 'application/json':
             request_data = self.request.body
-        elif self.request.method.lower() == 'patch':
+        elif self.request.method.lower() in ['patch', 'put']:
             request_data = QueryDict(self.request.body, encoding='utf-8')
         else:
             request_data = dict(self.request.POST) or None
