@@ -1,4 +1,3 @@
-
 import base64
 import hashlib
 import hmac
@@ -16,8 +15,8 @@ def create_private_key():
         base64_urlsafe private key
     """
     msg = "{0}{1}".format(time.time(), random.random())
-    s = hmac.new("request-signer", msg, hashlib.sha256)
-    return base64.urlsafe_b64encode(s.digest())
+    s = hmac.new(str.encode("request-signer"), str.encode(msg), hashlib.sha256)
+    return bytes.decode(base64.urlsafe_b64encode(s.digest()))
 
 
 class AuthorizedClient(models.Model):

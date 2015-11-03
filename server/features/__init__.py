@@ -2,7 +2,7 @@
 from django.test.client import Client
 from request_signer.client.generic import SignedRequestFactory
 from request_signer.models import AuthorizedClient
-from lettuce import step
+from aloe import step
 
 
 @step(u'Given a client with the client id "([^"]*)" and the private key "([^"]*)"')

@@ -1,5 +1,5 @@
-
 import mock
+# from unittest import mock
 
 from django import test
 from request_signer.client.generic import Response, WebException
@@ -61,7 +61,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.get_list("1234")
-        self.assertEqual(response.read.return_value, e.exception.message)
+        self.assertEqual(str(response.read.return_value), str(e.exception))
 
     def test_get_item_issues_get_json_response_for_endpoint(self):
         with mock.patch.object(self.sut, "_get_json_response") as get_response:
@@ -91,7 +91,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.get_item("1234", "pk-3")
-        self.assertEqual(response.read.return_value, e.exception.message)
+        self.assertEqual(str(response.read.return_value), str(e.exception))
 
     def test_create_issues_get_json_response_for_endpoint(self):
         data = {'some_data': 'to send'}
@@ -116,7 +116,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.create("1234", **data)
-        self.assertEqual(response.read.return_value, e.exception.message)
+        self.assertEqual(str(response.read.return_value), str(e.exception))
 
     def test_update_issues_get_json_response_for_endpoint(self):
         data = {'some_data': 'to send'}
@@ -143,7 +143,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.update("1234", "pk-3", **data)
-        self.assertEqual(response.read.return_value, e.exception.message)
+        self.assertEqual(str(response.read.return_value), str(e.exception))
 
     def test_delete_issues_get_json_response_for_endpoint(self):
         with mock.patch.object(self.sut, "_get_json_response") as get_response:
@@ -173,7 +173,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.delete("1234", "pk-3")
-        self.assertEqual(response.read.return_value, e.exception.message)
+        self.assertEqual(str(response.read.return_value), str(e.exception))
 
 
 class BaseDjangoRestClientInitTests(test.TestCase):

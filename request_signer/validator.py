@@ -1,4 +1,9 @@
-from urllib import unquote
+import six
+
+if six.PY3:
+    from urllib.parse import unquote
+else:
+    from urllib import unquote
 
 from django.http import QueryDict
 from django.utils.functional import cached_property
