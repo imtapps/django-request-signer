@@ -1,7 +1,12 @@
 import json
 import mock
-from urllib import unquote
 import re
+import six
+
+if six.PY3:
+    from urllib.parse import unquote
+else:
+    from urllib import unquote
 
 from django import test
 from django import http
@@ -131,91 +136,96 @@ class SignedRequestTests(test.TestCase):
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_get_data(self, get_signature):
-        get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+        signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+        get_signature.return_value = signature
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
         request = test.client.RequestFactory().get('/my/path/', data={
             'username': 'tester',
-            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
             constants.CLIENT_ID_PARAM_NAME: client.client_id,
+            constants.SIGNATURE_PARAM_NAME: signature
         })
         signed_view = signature_required(self.view)
         signed_view(request)
 
         call_url = unquote(request.get_full_path())
-        call_url = re.sub('&__signature=4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=', '', call_url)
+        call_url = re.sub(r'&__signature={}$'.format(signature), '', call_url, count=1)
         get_signature.assert_called_once_with(client.private_key, call_url, None)
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_no_content_type(self, get_signature):
-        get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+        signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
+        get_signature.return_value = signature
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
-        request = test.client.RequestFactory().get('/my/path/', data={
-            'username': 'tester',
-            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
-            constants.CLIENT_ID_PARAM_NAME: client.client_id,
-        })
+        request = test.client.RequestFactory().get("/my/path/?{}={}&{}={}".format(
+            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
+        ))
+
         if 'CONTENT_TYPE' in request.META:
             del request.META['CONTENT_TYPE']
         signed_view = signature_required(self.view)
         signed_view(request)
 
         call_url = unquote(request.get_full_path())
-        call_url = re.sub('&__signature=4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=', '', call_url)
+        call_url = re.sub(r'&__signature={}$'.format(signature), '', call_url, count=1)
         get_signature.assert_called_once_with(client.private_key, call_url, None)
 
     @mock.patch('apysigner.get_signature')
     def test_json_is_properly_parsed_into_signature(self, get_signature):
         signature = 'QEw8WN5YzbWlct5ZXH3GIumeiL8m4NErPtXOz_jWexc='
-        get_signature.return_value = signature
-
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
         url = "/my/path/?{}={}&{}={}".format(
-            constants.SIGNATURE_PARAM_NAME, signature, constants.CLIENT_ID_PARAM_NAME, client.client_id
+            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
         )
         data = {'our': 'data', 'goes': 'here'}
         json_string = json.dumps(data)
         request = test.client.RequestFactory().post(url, data=json_string, content_type="application/json")
         signed_view = signature_required(self.view)
         signed_view(request)
-
-        get_signature.assert_called_once_with(client.private_key, unquote(request.get_full_path()), json_string)
+        json_string = six.binary_type(json_string, 'utf-8') if six.PY3 else json_string
+        get_signature.assert_called_once_with(client.private_key, '/my/path/?__client_id=apps-testclient', json_string)
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_post_data(self, get_signature):
+        signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
         get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
 
-        url = '/my/path/?'
-        url += constants.SIGNATURE_PARAM_NAME + '=4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
-        url += "&" + constants.CLIENT_ID_PARAM_NAME + "=" + client.client_id
+        url = "/my/path/?{}={}&{}={}".format(
+            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
+        )
 
         request = test.client.RequestFactory().post(url, data={'username': 'tester'})
         signed_view = signature_required(self.view)
         signed_view(request)
-
-        get_signature.assert_called_once_with(client.private_key, unquote(request.get_full_path()), request.POST)
+        get_signature.assert_called_once_with(
+            client.private_key,
+            '/my/path/?__client_id=apps-testclient',
+            dict(request.POST)
+        )
 
     @mock.patch('apysigner.get_signature')
     def test_does_not_create_signature_with_multivalue_dict_to_prevent_data_loss(self, get_signature):
+        signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
         get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
 
-        url = '/my/path/?'
-        url += constants.SIGNATURE_PARAM_NAME + '=4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
-        url += "&" + constants.CLIENT_ID_PARAM_NAME + "=" + client.client_id
+        url = "/my/path/?{}={}&{}={}".format(
+            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
+        )
 
         request = test.client.RequestFactory().post(url, data={
             'usernames': ['t1', 't2', 't3']})
         signed_view = signature_required(self.view)
         signed_view(request)
 
-        get_signature.assert_called_once_with(client.private_key, unquote(request.get_full_path()), request.POST)
+        expected_url = re.sub(r'&__signature={}$'.format(signature), '', unquote(request.get_full_path()), count=1)
+        get_signature.assert_called_once_with(client.private_key, expected_url, dict(request.POST))
         posted_data = get_signature.mock_calls[0][1][2]
-        self.assertEqual([('usernames', ['t1', 't2', 't3'])], posted_data.items())
+        self.assertEqual([('usernames', ['t1', 't2', 't3'])], list(posted_data.items()))
 
     def test_signed_views_are_csrf_exempt(self):
         signed_view = signature_required(self.view)

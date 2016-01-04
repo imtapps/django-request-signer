@@ -1,7 +1,13 @@
-from cStringIO import StringIO
-import httplib
+import six
+if six.PY3:
+    from unittest import mock
+    from io import StringIO
+else:
+    import mock
+    from cStringIO import StringIO
+
+from http.client import responses
 import json
-import mock
 from django.utils import unittest
 from request_signer.client.generic import Response
 
@@ -34,7 +40,7 @@ class ResponseTests(unittest.TestCase):
         self.evaluate_response_code_for_success(True, include_status)
 
     def evaluate_response_code_for_success(self, expected, include_status):
-        statuses = (status for status in httplib.responses.keys() if include_status(status))
+        statuses = (status for status in responses.keys() if include_status(status))
         for response_code in statuses:
             value = self.response._evaluate_response_code_for_success(response_code)
             message = "it seems '%s' returned '%s' for some odd reason" % (response_code, value)

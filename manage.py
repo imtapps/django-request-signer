@@ -1,18 +1,23 @@
 #!/usr/bin/env python
+import six
 import os
 import sys
 
 
 def monkey_patch_for_multi_threaded():
-    import BaseHTTPServer
-    import SocketServer
-    OriginalHTTPServer = BaseHTTPServer.HTTPServer
+    if six.PY3:
+        from http.server import HTTPServer
+        from socketserver import ThreadingMixIn
+    else:
+        from BaseHTTPServer import HTTPServer
+        from SocketServer import ThreadingMixIn
+    OriginalHTTPServer = HTTPServer
 
-    class ThreadedHTTPServer(SocketServer.ThreadingMixIn, OriginalHTTPServer):
+    class ThreadedHTTPServer(ThreadingMixIn, OriginalHTTPServer):
         def __init__(self, server_address, RequestHandlerClass=None):
             OriginalHTTPServer.__init__(self, server_address, RequestHandlerClass)
 
-    BaseHTTPServer.HTTPServer = ThreadedHTTPServer
+    HTTPServer = ThreadedHTTPServer
 
 
 if __name__ == "__main__":

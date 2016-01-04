@@ -1,4 +1,3 @@
-
 from generic_request_signer.client import Client
 from generic_request_signer.exceptions import WebException, HttpMethodNotAllowed
 from generic_request_signer.request import Request

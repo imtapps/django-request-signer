@@ -16,12 +16,12 @@ class CreateClientTests(test.TestCase):
     def test_requires_client_in_options(self):
         with self.assertRaises(CommandError) as e:
             self.command.handle()
-        self.assertEqual("Client is required.", e.exception.message)
+        self.assertEqual("Client is required.", str(e.exception))
 
     def test_requires_client_to_be_not_empty(self):
         with self.assertRaises(CommandError) as e:
             self.command.handle(client="")
-        self.assertEqual("Client is required.", e.exception.message)
+        self.assertEqual("Client is required.", str(e.exception))
 
     def test_creates_client_with_key_provided(self):
         key = create_private_key()
