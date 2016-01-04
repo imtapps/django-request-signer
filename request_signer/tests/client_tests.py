@@ -83,7 +83,7 @@ class ClientTests(test.TestCase):
     @mock.patch('generic_request_signer.request.Request')
     def test_get_response_creates_request(self, request):
         method = 'GET'
-        data = dict(this="is", some='data', right='here')
+        data = dict(right='here', some='data', this="is")
         request_kwargs = {"headers": {"Accept": "application/json"}}
         with mock.patch.object(Client, '_get_service_url') as get_url:
             get_url.return_value = 'http://my_url'
@@ -91,9 +91,9 @@ class ClientTests(test.TestCase):
 
         request.assert_called_once_with(
             method,
-            'http://my_url?{0}={1}&this=is&right=here&some=data&{2}={3}'.format(
+            'http://my_url?{0}={1}&right=here&some=data&this=is&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, '4O7tEQEqpnoV6NKeiwRxgCA01yNbHAzVUjI1fYTlajA='),
+                constants.SIGNATURE_PARAM_NAME, 'iQ62VBsV4evmZchnIIxX82HZOlB1xOwzXfgtnd9RZlM='),
             None,
             **request_kwargs
         )
@@ -165,7 +165,7 @@ class ClientTests(test.TestCase):
     @mock.patch('generic_request_signer.request.Request')
     def test_get_raw_response_invokes_urlopen_with_request(self, request):
         self.get_response()
-        self.urlopen.assert_called_once_with(request.return_value)
+        self.urlopen.assert_called_once_with(request.return_value, timeout=15)
 
     def test_returns_raw_response_wrapped_with_response_object_when_urllib_works_as_expected(self):
         raw_response = self.get_response()
