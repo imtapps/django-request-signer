@@ -1,3 +1,4 @@
 django<1.7
 south
+apysigner>=3.0,<4.0
 generic-request-signer>=0.3.1
