@@ -4,3 +4,4 @@ django-nose
 nosexcover
 coverage
 lettuce
+flake8

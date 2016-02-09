@@ -14,26 +14,24 @@ virtualenv $VIRTUALENV_NAME
 find . -name "*.pyc" -delete
 
 pip install tox
+pip install flake8
 
 tox
 
 TEST_EXIT=$?
 rm -rf jenkins_reports
 mkdir jenkins_reports
-pep8 request_signer > jenkins_reports/pep8.report
-PEP8_EXIT=$?
-pyflakes request_signer > jenkins_reports/pyflakes.report
-PYFLAKES_EXIT=$?
+flake8 request_signer --max-complexity=5 --max-line-length=120 --exclude=base.py,"*/client/generic/__init__.py" > jenkins_reports/flake8.txt
+FLAKE8_EXIT=$?
 
 # cleanup virtualenv
 deactivate
 rm -rf $VIRTUALENV_NAME
 
-let JENKINS_EXIT="$TEST_EXIT + $PEP8_EXIT + $PYFLAKES_EXIT"
+let JENKINS_EXIT="$TEST_EXIT + $FLAKE8_EXIT"
 if [ $JENKINS_EXIT -gt 2 ]; then
     echo "Test exit status:" $TEST_EXIT
-    echo "PEP8 exit status:" $PEP8_EXIT
-    echo "Pyflakes exit status:" $PYFLAKES_EXIT
+    echo "Flake8 exit status:" $FLAKE8_EXIT
     echo "Exiting Build with status:" $EXIT
     exit $JENKINS_EXIT
 fi
