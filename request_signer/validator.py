@@ -52,5 +52,5 @@ class SignatureValidator(object):
         elif self.request.method.lower() == 'patch':
             request_data = QueryDict(self.request.body, encoding='utf-8')
         else:
-            request_data = dict(self.request.POST) or None
+            request_data = dict(self.request.POST) or {}
         return request_data

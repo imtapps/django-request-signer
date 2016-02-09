@@ -140,7 +140,7 @@ class SignedRequestTests(test.TestCase):
         signed_view = signature_required(self.view)
         signed_view(request)
 
-        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
+        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), {})
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_no_content_type(self, get_signature):
@@ -157,7 +157,7 @@ class SignedRequestTests(test.TestCase):
         signed_view = signature_required(self.view)
         signed_view(request)
 
-        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), None)
+        get_signature.assert_called_once_with(client.private_key, request.get_full_path(), {})
 
     @mock.patch('apysigner.get_signature')
     def test_json_is_properly_parsed_into_signature(self, get_signature):
