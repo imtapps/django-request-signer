@@ -1,5 +1,3 @@
-
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -60,11 +58,21 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django_nose',
     'server',
-    'lettuce.django',
 ) + PROJECT_APPS
 
-LETTUCE_APPS = (
-    'request_signer',
-)
-
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends.schema': {
+            'level': 'ERROR',
+            'handlers': ['null'],
+        },
+    }
+}

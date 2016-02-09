@@ -1,12 +1,20 @@
-
-from cStringIO import StringIO
+import six
 import json
-import urllib2
-import mock
+
+if six.PY3:
+    from io import StringIO
+    import urllib.request as urllib
+    from urllib.request import HTTPError
+    from unittest import mock, TestCase
+else:
+    import urllib2 as urllib
+    import mock
+    from urllib2 import HTTPError
+    from unittest import TestCase
+    from cStringIO import StringIO
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django import test
 
 from request_signer import constants
 from request_signer import models
@@ -20,7 +28,7 @@ class TestableClient(Client):
         super(TestableClient, self).__init__(api_credentials)
 
 
-class ClientTests(test.TestCase):
+class ClientTests(TestCase):
 
     def setUp(self):
         self.settings_name = 'SAMPLE_AUTH_DOMAIN'
@@ -37,7 +45,7 @@ class ClientTests(test.TestCase):
         self.setup_client()
 
         self.endpoint = '/some/endpoint'
-        self.urlopen_patch = mock.patch.object(urllib2, 'urlopen')
+        self.urlopen_patch = mock.patch.object(urllib, 'urlopen')
         self.urlopen = self.urlopen_patch.start()
         self.request = Request('GET', self.url, dict())
 
@@ -72,18 +80,18 @@ class ClientTests(test.TestCase):
         delattr(self.client, client_attribute)
         with self.assertRaises(ImproperlyConfigured) as error:
             getattr(self.client, client_property)
-        self.assertIn(client_attribute, error.exception.message)
+        self.assertIn(client_attribute, str(error.exception))
 
     def assert_client_raises_improperty_configured_with_missing_settings_name(self, settings_name, client_property):
         delattr(settings, settings_name)
         with self.assertRaises(ImproperlyConfigured) as error:
             getattr(self.client, client_property)
-        self.assertIn(settings_name, error.exception.message)
+        self.assertIn(settings_name, str(error.exception))
 
     @mock.patch('generic_request_signer.request.Request')
     def test_get_response_creates_request(self, request):
         method = 'GET'
-        data = dict(this="is", some='data', right='here')
+        data = dict(right='here', some='data', this="is")
         request_kwargs = {"headers": {"Accept": "application/json"}}
         with mock.patch.object(Client, '_get_service_url') as get_url:
             get_url.return_value = 'http://my_url'
@@ -91,9 +99,9 @@ class ClientTests(test.TestCase):
 
         request.assert_called_once_with(
             method,
-            'http://my_url?{0}={1}&this=is&right=here&some=data&{2}={3}'.format(
+            'http://my_url?{0}={1}&right=here&some=data&this=is&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, '4O7tEQEqpnoV6NKeiwRxgCA01yNbHAzVUjI1fYTlajA='),
+                constants.SIGNATURE_PARAM_NAME, 'iQ62VBsV4evmZchnIIxX82HZOlB1xOwzXfgtnd9RZlM='),
             None,
             **request_kwargs
         )
@@ -105,14 +113,14 @@ class ClientTests(test.TestCase):
         request_kwargs = dict(headers={"Content-Type": "application/json"})
         with mock.patch.object(Client, '_get_service_url') as get_url:
             get_url.return_value = 'http://my_url'
-            self.get_response(method, self.endpoint, data, **request_kwargs)
+            self.get_response(method, self.endpoint, json.dumps(data, sort_keys=True), **request_kwargs)
 
         request.assert_called_once_with(
             method,
             'http://my_url?{0}={1}&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, 'sdZFX_EhMFS6JclVejIJu_UgKHM7Z3HIRXZ8C_rXwQE='),
-            json.dumps(data),
+                constants.SIGNATURE_PARAM_NAME, 'GQuoMFCNPBPoG736rfILRebBvlcnaj72LJU4cVSxqQo='),
+            json.dumps(data, sort_keys=True),
             **request_kwargs
         )
 
@@ -173,14 +181,14 @@ class ClientTests(test.TestCase):
         self.assertEqual(raw_response.raw_response, self.urlopen.return_value)
 
     def test_raw_error_returned_wrapped_with_response_object_when_exception_thrown(self):
-        expected = urllib2.HTTPError(None, 500, None, None, StringIO())
+        expected = HTTPError(None, 500, None, None, StringIO())
         self.urlopen.side_effect = expected
         error_as_response = self.get_response()
         self.assertIsInstance(error_as_response, Response)
         self.assertEqual(expected, error_as_response.raw_response)
 
 
-class ClientBackendTests(test.TestCase):
+class ClientBackendTests(TestCase):
 
     def test_uses_api_credentials_from_authorized_service_provider_model(self):
         prov = models.AuthorizedServiceProvider(base_url="my_url", client_id="my_id", private_key="my_key")
