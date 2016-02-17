@@ -150,7 +150,7 @@ class SignedRequestTests(test.TestCase):
 
         call_url = unquote(request.get_full_path())
         call_url = re.sub(r'&__signature={}$'.format(signature), '', call_url, count=1)
-        get_signature.assert_called_once_with(client.private_key, call_url, None)
+        get_signature.assert_called_once_with(client.private_key, call_url, {})
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_no_content_type(self, get_signature):
@@ -169,7 +169,7 @@ class SignedRequestTests(test.TestCase):
 
         call_url = unquote(request.get_full_path())
         call_url = re.sub(r'&__signature={}$'.format(signature), '', call_url, count=1)
-        get_signature.assert_called_once_with(client.private_key, call_url, None)
+        get_signature.assert_called_once_with(client.private_key, call_url, {})
 
     @mock.patch('apysigner.get_signature')
     def test_json_is_properly_parsed_into_signature(self, get_signature):
