@@ -183,7 +183,6 @@ class SignedRequestTests(test.TestCase):
         request = test.client.RequestFactory().post(url, data=json_string, content_type="application/json")
         signed_view = signature_required(self.view)
         signed_view(request)
-        json_string = six.binary_type(json_string, 'utf-8') if six.PY3 else json_string
         get_signature.assert_called_once_with(client.private_key, '/my/path/?__client_id=apps-testclient', json_string)
 
     @mock.patch('apysigner.get_signature')
