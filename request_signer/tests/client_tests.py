@@ -93,7 +93,7 @@ class ClientTests(test.TestCase):
             method,
             'http://my_url?{0}={1}&right=here&some=data&this=is&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, 'iQ62VBsV4evmZchnIIxX82HZOlB1xOwzXfgtnd9RZlM='),
+                constants.SIGNATURE_PARAM_NAME, '5oRsP9rQ-qozJlwlrV2DrC3JJitT4J8zXsuucnN6Ogg='),
             None,
             **request_kwargs
         )
