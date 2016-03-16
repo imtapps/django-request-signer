@@ -1,6 +1,6 @@
 south
 generic-request-signer>=0.3.1
-tox
+tox==1.6.1
 mock
 django-nose
 nosexcover
