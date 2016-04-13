@@ -41,7 +41,7 @@ class SignatureValidator(object):
 
     @property
     def url_path(self):
-        return unquote(self.request.get_full_path())
+        return self.request.get_full_path()
 
     @property
     def client(self):
