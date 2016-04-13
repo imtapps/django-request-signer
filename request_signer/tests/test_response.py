@@ -54,10 +54,6 @@ class ResponseTests(unittest.TestCase):
         self.raw_response.read.return_value = '{"first":"item"}'
         self.assertEqual(dict(first='item'), self.response.json)
 
-    def test_returns_empty_dict_when_response_is_empty_string(self):
-        self.raw_response.read.return_value = ''
-        self.assertEqual({}, self.response.json)
-
     def test_can_read_response_multiple_times(self):
         data = '{"data": "this is the response"}'
         expected = json.loads(data)
