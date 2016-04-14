@@ -11,6 +11,9 @@ else:
 from django import test
 from django import http
 from django.test.utils import override_settings
+from django.conf.urls import url, patterns
+
+from apysigner import get_signature
 
 from request_signer import models, constants
 from request_signer.validator import SignatureValidator
@@ -18,6 +21,10 @@ from request_signer.decorators import signature_required, has_valid_signature
 
 
 class SignedRequestTests(test.TestCase):
+    urls = patterns(
+        '',
+        url(r'^test/$', signature_required(lambda request, *args, **kwargs: http.HttpResponse("Completed Test View!")))
+    )
 
     @property
     def view(self):
@@ -134,23 +141,19 @@ class SignedRequestTests(test.TestCase):
         self.assertFalse(has_valid_signature(request))
         self.assertFalse(send_signal.called)
 
-    @mock.patch('apysigner.get_signature')
-    def test_calls_create_signature_properly_with_get_data(self, get_signature):
-        signature = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
-        get_signature.return_value = signature
-
+    def test_calls_create_signature_properly_with_get_data(self):
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
-        request = test.client.RequestFactory().get('/my/path/', data={
-            'username': 'tester',
-            constants.CLIENT_ID_PARAM_NAME: client.client_id,
-            constants.SIGNATURE_PARAM_NAME: signature
-        })
-        signed_view = signature_required(self.view)
-        signed_view(request)
+        url = '/test/?username=test&__client_id=apps-testclient'
+        signature = get_signature(client.private_key, url)
+        response = self.client.get('{}&__signature={}'.format(url, signature))
+        self.assertEqual(200, response.status_code)
 
-        call_url = unquote(request.get_full_path())
-        call_url = re.sub(r'&__signature={}$'.format(signature), '', call_url, count=1)
-        get_signature.assert_called_once_with(client.private_key, call_url, {})
+    def test_calls_create_signature_properly_with_get_data_and_with_an_at_symbol(self):
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = '/test/?username=test@example.com&__client_id=apps-testclient'
+        signature = get_signature(client.private_key, url)
+        response = self.client.get('{}&__signature={}'.format(url, signature))
+        self.assertEqual(200, response.status_code)
 
     @mock.patch('apysigner.get_signature')
     def test_calls_create_signature_properly_with_no_content_type(self, get_signature):
