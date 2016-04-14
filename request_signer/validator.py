@@ -1,10 +1,3 @@
-import six
-
-if six.PY3:
-    from urllib.parse import unquote
-else:
-    from urllib import unquote
-
 from django.http import QueryDict
 from django.utils.functional import cached_property
 from generic_request_signer.check_signature import check_signature
