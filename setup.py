@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-request-signer',
-    version='0.8.1',
+    version='0.8.2',
     author='imtapps',
     url='https://github.com/imtapps/django-request-signer',
     description="A python library for signing http requests.",
