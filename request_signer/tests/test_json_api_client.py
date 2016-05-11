@@ -19,19 +19,14 @@ class Settings(object):
 
 @csrf_exempt
 def items(request, pk=None):
-    if request.method == 'PATCH':
-        data = {'data': {'attributes': {'name': 'Item Blah!'}, 'id': 2, 'type': 'Item'}}
-    elif request.method == 'POST':
-        data = {'data': {'attributes': {'name': 'New Item'}, 'id': 1, 'type': 'Item'}}
-    elif request.method == 'DELETE':
-        return http.HttpResponse(status=204, content_type='application/vnd.api+json')
-    elif pk:
+    data = {'data': [
+        {'attributes': {'name': 'Item 1'}, 'id': 1, 'type': 'Item'},
+        {'attributes': {'name': 'Item 2'}, 'id': 2, 'type': 'Item'}
+    ]}
+    if pk or request.method in ['PATCH', 'POST']:
         data = {'data': {'attributes': {'name': 'Item 2'}, 'id': 2, 'type': 'Item'}}
-    else:
-        data = {'data': [
-            {'attributes': {'name': 'Item 1'}, 'id': 1, 'type': 'Item'},
-            {'attributes': {'name': 'Item 2'}, 'id': 2, 'type': 'Item'}
-        ]}
+    if request.method == 'DELETE':
+        return http.HttpResponse(status=204, content_type='application/vnd.api+json')
     return http.HttpResponse(json.dumps(data), content_type='application/vnd.api+json')
 
 
@@ -73,15 +68,15 @@ class BaseDjangoJsonApiClientTests(test.LiveServerTestCase):
             client.get('exception')
 
     def test_update_specific_item(self):
-        data = {'data': {'attributes': {'name': 'Item Blah!'}, 'id': 2, 'type': 'Item'}}
-        response = self.json_api_client.update('item', 2, data)
+        data = {'data': {'attributes': {'name': 'Item 2'}, 'id': 2, 'type': 'Item'}}
+        response = self.json_api_client.update('item', 1, data)
         self.assertEqual(200, response.status_code)
         self.assertEqual(data, response.json)
 
     def test_create_new_item(self):
-        data = {'data': {'attributes': {'name': 'New Item'}, 'type': 'Item'}}
+        data = {'data': {'attributes': {'name': 'Item 2'}, 'type': 'Item'}}
         response = self.json_api_client.create('item', data)
-        expected = {'data': {'attributes': {'name': 'New Item'}, 'id': 1, 'type': 'Item'}}
+        expected = {'data': {'attributes': {'name': 'Item 2'}, 'id': 2, 'type': 'Item'}}
         self.assertEqual(200, response.status_code)
         self.assertEqual(expected, response.json)
 
