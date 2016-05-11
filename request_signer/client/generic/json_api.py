@@ -3,9 +3,10 @@ from request_signer.client.generic import Client, WebException, django_backend
 
 class BaseDjangoJsonApiClient(Client):
 
-    def __init__(self, api_credentials=None, exception_type=WebException):
+    EXCEPTION_TYPE = WebException
+
+    def __init__(self, api_credentials=None):
         api_credentials = api_credentials or django_backend.DjangoSettingsApiCredentialsBackend(self)
-        self.exception_type = exception_type
         super(BaseDjangoJsonApiClient, self).__init__(api_credentials)
 
     def get(self, resource, lookup_field=None):
@@ -28,5 +29,5 @@ class BaseDjangoJsonApiClient(Client):
             endpoint += '{}/'.format(lookup_field)
         response = self._get_response(method, endpoint, data, headers=headers)
         if not response.is_successful and response.status_code != 404:
-            raise self.exception_type(response.read())
+            raise self.EXCEPTION_TYPE(response.read())
         return response

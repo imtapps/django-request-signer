@@ -61,10 +61,14 @@ class BaseDjangoJsonApiClientTests(test.LiveServerTestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(expected, response.json)
 
-    def test_exception_can_be_passed_to_client(self):
+    def test_exception_can_be_set_in_subclasses(self):
         class TestException(WebException):
             pass
-        client = BaseDjangoJsonApiClient(Settings(self.live_server_url), TestException)
+
+        class TestClient(BaseDjangoJsonApiClient):
+            EXCEPTION_TYPE = TestException
+
+        client = TestClient(Settings(self.live_server_url))
         with self.assertRaises(TestException):
             client.get('exception')
 
