@@ -9,50 +9,24 @@ class BaseDjangoJsonApiClient(Client):
         super(BaseDjangoJsonApiClient, self).__init__(api_credentials)
 
     def get(self, resource, lookup_field=None):
+        return self.get_response('GET', resource, lookup_field, headers={'Accept': 'application/vnd.api+json'})
+
+    def update(self, resource, lookup_field, data=None):
+        headers = {'Accept': 'application/vnd.api+json', 'Content-Type': 'application/vnd.api+json'}
+        return self.get_response('PATCH', resource, lookup_field, data, headers)
+
+    def create(self, resource, data=None):
+        headers = {'Accept': 'application/vnd.api+json', 'Content-Type': 'application/vnd.api+json'}
+        return self.get_response('POST', resource, data=data, headers=headers)
+
+    def delete(self, resource, lookup_field):
+        return self.get_response('DELETE', resource, lookup_field, headers={'Accept': 'application/vnd.api+json'})
+
+    def get_response(self, method, resource, lookup_field=None, data=None, headers=None):
         endpoint = '/{}/'.format(resource)
         if lookup_field:
             endpoint += '{}/'.format(lookup_field)
-        response = self._get_response('GET', endpoint, None, headers={'Accept': 'application/vnd.api+json'})
-        if self.request_unsuccessful(response):
+        response = self._get_response(method, endpoint, data, headers=headers)
+        if not response.is_successful and response.status_code != 404:
             raise self.exception_type(response.read())
         return response
-
-    def update(self, resource, lookup_field, data=None):
-        endpoint = '/{}/{}/'.format(resource, lookup_field)
-        response = self._get_response(
-            'PATCH',
-            endpoint,
-            data,
-            headers={
-                'Accept': 'application/vnd.api+json',
-                'Content-Type': 'application/vnd.api+json'
-            }
-        )
-        if self.request_unsuccessful(response):
-            raise self.exception_type(response.read())
-        return response
-
-    def create(self, resource, data=None):
-        endpoint = '/{}/'.format(resource)
-        response = self._get_response(
-            'POST',
-            endpoint,
-            data,
-            headers={
-                'Accept': 'application/vnd.api+json',
-                'Content-Type': 'application/vnd.api+json'
-            }
-        )
-        if self.request_unsuccessful(response):
-            raise self.exception_type(response.read())
-        return response
-
-    def delete(self, resource, lookup_field):
-        endpoint = '/{}/{}/'.format(resource, lookup_field)
-        response = self._get_response('DELETE', endpoint, headers={'Accept': 'application/vnd.api+json'})
-        if self.request_unsuccessful(response):
-            raise self.exception_type(response.read())
-        return response
-
-    def request_unsuccessful(self, response):
-        return not response.is_successful and response.status_code != 404
