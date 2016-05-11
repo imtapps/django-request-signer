@@ -35,7 +35,7 @@ def items(request, pk=None):
     return http.HttpResponse(json.dumps(data), content_type='application/vnd.api+json')
 
 
-class SignedRequestTests(test.LiveServerTestCase):
+class BaseDjangoJsonApiClientTests(test.LiveServerTestCase):
     urls = patterns(
         '',
         url(r'^item/$', items),
