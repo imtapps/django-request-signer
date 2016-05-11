@@ -1,6 +1,7 @@
 #!/bin/bash
 
-python manage.py test --with-xunit --with-xcover --cover-package=request_signer
+PORT=$(($RANDOM+2000))
+python manage.py test --liveserver=localhost:$PORT
 TEST_EXIT=$?
 
 echo "Flake8 Results"
