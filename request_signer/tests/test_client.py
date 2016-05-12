@@ -120,7 +120,7 @@ class ClientTests(TestCase):
             'http://my_url?{0}={1}&{2}={3}'.format(
                 constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
                 constants.SIGNATURE_PARAM_NAME, 'GQuoMFCNPBPoG736rfILRebBvlcnaj72LJU4cVSxqQo='),
-            json.dumps(data, sort_keys=True),
+            json.dumps(data, sort_keys=True).encode('utf8'),
             **request_kwargs
         )
 
