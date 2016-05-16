@@ -39,7 +39,7 @@ class BaseDjangoJsonApiClientTests(test.LiveServerTestCase):
     )
 
     def setUp(self):
-        self.json_api_client = BaseDjangoJsonApiClient(Settings(self.live_server_url))
+        self.json_api_client = BaseDjangoJsonApiClient(9690, Settings(self.live_server_url))
 
     def test_get_list_of_items(self):
         expected = {'data': [
@@ -63,7 +63,7 @@ class BaseDjangoJsonApiClientTests(test.LiveServerTestCase):
         class TestClient(BaseDjangoJsonApiClient):
             EXCEPTION_TYPE = TestException
 
-        client = TestClient(Settings(self.live_server_url))
+        client = TestClient(9690, Settings(self.live_server_url))
         with self.assertRaises(TestException):
             client.get('exception')
 
