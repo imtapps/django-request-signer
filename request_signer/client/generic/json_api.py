@@ -10,9 +10,9 @@ class BaseDjangoJsonApiClient(Client):
         api_credentials = api_credentials or django_backend.DjangoSettingsApiCredentialsBackend(self)
         super(BaseDjangoJsonApiClient, self).__init__(api_credentials)
 
-    def get(self, resource, lookup_field=None):
+    def get(self, resource, lookup_field=None, data=None):
         headers = {'Accept': 'application/vnd.api+json', 'company': self.company}
-        return self.get_response('GET', resource, lookup_field, headers=headers)
+        return self.get_response('GET', resource, lookup_field, data=data, headers=headers)
 
     def update(self, resource, lookup_field, data=None):
         headers = {'Accept': 'application/vnd.api+json',

@@ -23,10 +23,18 @@ def items(request, pk=None):
         {'attributes': {'name': 'Item 1'}, 'id': 1, 'type': 'Item'},
         {'attributes': {'name': 'Item 2'}, 'id': 2, 'type': 'Item'}
     ]}
-    if pk or request.method in ['PATCH', 'POST']:
+    if 'abc123' in request.GET.get('number', ''):
+        data = {'data': [{'attributes': {'name': 'Item abc123'}, 'id': 2, 'type': 'Item'}]}
+    if request.method == 'POST':
         data = {'data': {'attributes': {'name': 'Item 2'}, 'id': 2, 'type': 'Item'}}
+    return http.HttpResponse(json.dumps(data), content_type='application/vnd.api+json')
+
+
+@csrf_exempt
+def item(request, pk=None):
     if request.method == 'DELETE':
         return http.HttpResponse(status=204, content_type='application/vnd.api+json')
+    data = {'data': {'attributes': {'name': 'Item 2'}, 'id': 2, 'type': 'Item'}}
     return http.HttpResponse(json.dumps(data), content_type='application/vnd.api+json')
 
 
@@ -34,7 +42,7 @@ class BaseDjangoJsonApiClientTests(test.LiveServerTestCase):
     urls = patterns(
         '',
         url(r'^item/$', items),
-        url(r'^item/(?P<pk>[0-9]+)/$', items),
+        url(r'^item/(?P<pk>[0-9]+)/$', item),
         url(r'^exception/$', lambda request: 'x'.items()),
     )
 
@@ -83,3 +91,9 @@ class BaseDjangoJsonApiClientTests(test.LiveServerTestCase):
     def test_delete_specific_item(self):
         response = self.json_api_client.delete('item', 2)
         self.assertEqual(204, response.status_code)
+
+    def test_can_get_filtered_items_with_query_string(self):
+        response = self.json_api_client.get('item', data={'number': 'abc123'})
+        self.assertEqual(200, response.status_code)
+        expected = {'data': [{'attributes': {'name': 'Item abc123'}, 'id': 2, 'type': 'Item'}]}
+        self.assertEqual(expected, response.json)
