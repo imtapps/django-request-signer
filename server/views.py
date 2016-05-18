@@ -9,3 +9,9 @@ class SampleView(View):
 
     def post(self, request):
         return http.HttpResponse("hi")
+
+    def patch(self, request):
+        return http.HttpResponse("hi")
+
+    def put(self, request):
+        return http.HttpResponse("hi")

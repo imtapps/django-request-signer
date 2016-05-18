@@ -5,6 +5,8 @@ from django import test
 from django import http
 from django.test.utils import override_settings
 
+from apysigner import get_signature
+
 from request_signer import models, constants
 from request_signer.validator import SignatureValidator
 from request_signer.decorators import signature_required, has_valid_signature
@@ -248,3 +250,53 @@ class SignedRequestTests(test.TestCase):
                 u'"usernames"\r\n\r\nt2\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
                 u'"usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n']}
         self.assertEqual(expected, SignatureValidator(request).request_data)
+
+    @mock.patch('apysigner.get_signature')
+    def test_json_api_is_properly_parsed_into_signature(self, get_signature):
+        signature = 'QEw8WN5YzbWlct5ZXH3GIumeiL8m4NErPtXOz_jWexc='
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = "/my/path/?{}={}&{}={}".format(
+            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
+        )
+        data = {'our': 'data', 'goes': 'here'}
+        json_string = json.dumps(data)
+        request = test.client.RequestFactory().post(url, data=json_string, content_type="application/vnd.api+json")
+        signed_view = signature_required(self.view)
+        signed_view(request)
+        get_signature.assert_called_once_with(client.private_key, '/my/path/?__client_id=apps-testclient', json_string)
+
+    def test_json_api_payload_is_valid(self):
+        json_string = json.dumps({'our': 'data', 'goes': 'here'})
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = '/sample/?username=test@example.com&{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+        signature = get_signature(client.private_key, url, json_string)
+        response = self.client.post(
+            '{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature),
+            json_string,
+            content_type="application/vnd.api+json"
+        )
+        self.assertEqual(200, response.status_code)
+
+    def test_put_json_api_is_valid(self):
+        data = json.dumps({'username': ['tester', 'billyjean']})
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = '/sample/?{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+        signature = get_signature(client.private_key, url, payload=data)
+        response = self.client.put(
+            '{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature),
+            data=data,
+            content_type="application/vnd.api+json"
+        )
+        self.assertEqual(200, response.status_code)
+
+    def test_patch_json_api_is_valid(self):
+        data = json.dumps({'username': ['tester', 'billyjean']})
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = '/sample/?{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+        signature = get_signature(client.private_key, url, payload=data)
+        response = self.client.patch(
+            '{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature),
+            data=data,
+            content_type="application/vnd.api+json"
+        )
+        self.assertEqual(200, response.status_code)
