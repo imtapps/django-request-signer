@@ -1,9 +1,15 @@
+import six
 from django.http import QueryDict
 from django.utils.functional import cached_property
 from generic_request_signer.check_signature import check_signature
 
 from request_signer import constants, models
 from request_signer.signals import successful_signed_request
+
+if six.PY3:
+    from urllib.parse import unquote
+else:
+    from urllib import unquote
 
 
 class SignatureValidator(object):
@@ -22,7 +28,9 @@ class SignatureValidator(object):
     @cached_property
     def signature_was_valid(self):
         if self.client:
-            return check_signature(self.signature, self.client.private_key, self.url_path, self.request_data)
+            result = check_signature(self.signature, self.client.private_key, self.url_path, self.request_data)
+            return result or check_signature(
+                self.signature, self.client.private_key, unquote(self.url_path), self.request_data)
 
     @property
     def signature(self):
