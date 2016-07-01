@@ -30,7 +30,14 @@ class SignatureValidator(object):
         if self.client:
             result = check_signature(self.signature, self.client.private_key, self.url_path, self.request_data)
             return result or check_signature(
-                self.signature, self.client.private_key, unquote(self.url_path), self.request_data)
+                self.signature, self.client.private_key, unquote(self.url_path), self.request_data
+            ) or self.unquote_base_url
+
+    @property
+    def unquote_base_url(self):
+        url, query = self.url_path.split('?')
+        return check_signature(
+            self.signature, self.client.private_key, '{}?{}'.format(unquote(url), query), self.request_data)
 
     @property
     def signature(self):
