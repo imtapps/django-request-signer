@@ -64,6 +64,13 @@ class SignedRequestTests(test.TestCase):
         response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
         self.assertEqual(200, response.status_code)
 
+    def test_signature_works_when_url_contains_spaces_and_querystring_contains_escaped_chars(self):
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = '/test/a b c/?username=test%2C&{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+        signature = get_signature(client.private_key, url)
+        response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
+        self.assertEqual(200, response.status_code)
+
     def test_signature_works_when_url_contains_spaces(self):
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
         url = '/test/a b c/?username=test&{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
