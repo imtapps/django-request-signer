@@ -5,3 +5,4 @@ nosexcover
 coverage
 lettuce
 flake8
+aloe
