@@ -9,7 +9,6 @@ class AuthorizedClientForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AuthorizedClientForm, self).__init__(*args, **kwargs)
-        self.fields['private_key'].widget.attrs['readonly'] = 'readonly'
         self.fields['private_key'].widget.attrs['style'] = 'width: 300px; background-color: #ccc;'
 
     class Meta(object):
