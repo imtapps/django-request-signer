@@ -1,7 +1,6 @@
 .. _django_request_signer:
 
-This branch is used for Django versions >= 1.7.
-To use this branch, pip install >= 1.0
+Version 4 is compatible with Python 3 and Django 1.8+
 
 *********************
 Django Request Signer
