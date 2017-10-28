@@ -374,3 +374,11 @@ class SignedRequestTests(test.TestCase):
             content_type="application/vnd.api+json"
         )
         self.assertEqual(200, response.status_code)
+
+    def test_calls_database_only_once_per_request(self):
+        client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
+        url = '/test/?username=test&{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+        signature = get_signature(client.private_key, url)
+        with self.assertNumQueries(1):
+            response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
+            self.assertEqual(200, response.status_code)

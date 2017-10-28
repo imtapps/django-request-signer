@@ -51,7 +51,7 @@ class SignatureValidator(object):
     def url_path(self):
         return self.request.get_full_path()
 
-    @property
+    @cached_property
     def client(self):
         if not self.signature or not self.client_id:
             return False
