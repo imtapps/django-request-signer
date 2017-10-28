@@ -11,7 +11,6 @@ else:
 from django import test
 from django import http
 from django.test.utils import override_settings
-from django.conf.urls import url, patterns
 
 from apysigner import get_signature
 
@@ -21,11 +20,6 @@ from request_signer.decorators import signature_required, has_valid_signature
 
 
 class SignedRequestTests(test.TestCase):
-    urls = patterns(
-        '',
-        url(r'^test/$', signature_required(lambda request, *args, **kwargs: http.HttpResponse("Completed Test View!"))),
-        url(r'^test/(?P<arg>.*)/$', signature_required(lambda request, *args, **kwargs: http.HttpResponse("X")))
-    )
 
     @property
     def view(self):

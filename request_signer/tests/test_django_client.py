@@ -1,10 +1,10 @@
 import mock
-from django.utils import unittest
+from django import test
 from request_signer.client.generic import Client
 from request_signer.client.generic.django_client import DjangoClient
 
 
-class DjangoClientTests(unittest.TestCase):
+class DjangoClientTests(test.TestCase):
 
     sut_class = DjangoClient
 
