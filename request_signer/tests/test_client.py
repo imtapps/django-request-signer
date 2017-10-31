@@ -98,12 +98,10 @@ class ClientTests(TestCase):
             self.get_response(method, self.endpoint, data, **request_kwargs)
 
         request.assert_called_once_with(
-            method,
-            'http://my_url?{0}={1}&right=here&some=data&this=is&{2}={3}'.format(
-                constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, '5oRsP9rQ-qozJlwlrV2DrC3JJitT4J8zXsuucnN6Ogg='),
-            None,
-            **request_kwargs
+            method, 'http://my_url?{0}={1}&right=here&some=data&this=is&{2}={3}'.format(
+                constants.CLIENT_ID_PARAM_NAME, self.client._client_id, constants.SIGNATURE_PARAM_NAME,
+                '5oRsP9rQ-qozJlwlrV2DrC3JJitT4J8zXsuucnN6Ogg='
+            ), None, **request_kwargs
         )
 
     @mock.patch('generic_request_signer.request.Request')
@@ -116,12 +114,10 @@ class ClientTests(TestCase):
             self.get_response(method, self.endpoint, json.dumps(data, sort_keys=True), **request_kwargs)
 
         request.assert_called_once_with(
-            method,
-            'http://my_url?{0}={1}&{2}={3}'.format(
-                constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, 'GQuoMFCNPBPoG736rfILRebBvlcnaj72LJU4cVSxqQo='),
-            json.dumps(data, sort_keys=True).encode('utf8'),
-            **request_kwargs
+            method, 'http://my_url?{0}={1}&{2}={3}'.format(
+                constants.CLIENT_ID_PARAM_NAME, self.client._client_id, constants.SIGNATURE_PARAM_NAME,
+                'GQuoMFCNPBPoG736rfILRebBvlcnaj72LJU4cVSxqQo='
+            ), json.dumps(data, sort_keys=True).encode('utf8'), **request_kwargs
         )
 
     def test_get_response_gets_url_with_endpoint(self):
@@ -199,6 +195,7 @@ class ClientBackendTests(TestCase):
         self.assertEqual(prov.private_key, client._private_key)
 
     def test_uses_api_credentials_from_object_that_implements_api_credential_attributes(self):
+
         class X(object):
             base_url = "my_url"
             client_id = "my_id"

@@ -1,22 +1,20 @@
 from setuptools import setup, find_packages
 
-
 setup(
     name='django-request-signer',
-    version='3.3.0',
+    version='4.0.0',
     author='imtapps',
     url='https://github.com/imtapps/django-request-signer',
     description="A python library for signing http requests.",
     long_description=open('README.rst', 'r').read(),
     install_requires=open('requirements/dist.txt').read().split("\n"),
     packages=find_packages(exclude=("example", "server")),
-
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'License :: OSI Approved :: BSD License',
         'Topic :: Internet',
         'Topic :: Internet :: WWW/HTTP',

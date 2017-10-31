@@ -8,11 +8,11 @@ else:
 
 from http.client import responses
 import json
-from django.utils import unittest
+from django import test
 from request_signer.client.generic import Response
 
 
-class ResponseTests(unittest.TestCase):
+class ResponseTests(test.TestCase):
 
     def setUp(self):
         self.raw_response = mock.Mock()

@@ -37,7 +37,8 @@ class SignatureValidator(object):
     def unquote_base_url(self):
         url, query = self.url_path.split('?')
         return check_signature(
-            self.signature, self.client.private_key, '{}?{}'.format(unquote(url), query), self.request_data)
+            self.signature, self.client.private_key, '{}?{}'.format(unquote(url), query), self.request_data
+        )
 
     @property
     def signature(self):
@@ -51,7 +52,7 @@ class SignatureValidator(object):
     def url_path(self):
         return self.request.get_full_path()
 
-    @property
+    @cached_property
     def client(self):
         if not self.signature or not self.client_id:
             return False

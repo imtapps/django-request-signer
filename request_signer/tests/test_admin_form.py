@@ -6,4 +6,4 @@ class AdminAuthorizedClientFormTests(test.TestCase):
 
     def test_sets_private_key_widget_is_styled(self):
         form = AuthorizedClientForm()
-        self.assertEqual('width: 300px; background-color: #ccc;', form.fields['private_key'].widget.attrs['style'])
+        self.assertEqual('width: 300px;', form.fields['private_key'].widget.attrs['style'])

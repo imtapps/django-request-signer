@@ -44,9 +44,7 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'example.urls'
 
-PROJECT_APPS = (
-    'request_signer',
-)
+PROJECT_APPS = ('request_signer', )
 
 INSTALLED_APPS = (
     'django.contrib.auth',

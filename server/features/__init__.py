@@ -13,10 +13,7 @@ def set_client_id(step, client_id, private_key):
 
 @step(u'And that client is registered with the server')
 def register_client(step):
-    AuthorizedClient.objects.create(
-        client_id=step.scenario.client_id,
-        private_key=step.scenario.private_key
-    )
+    AuthorizedClient.objects.create(client_id=step.scenario.client_id, private_key=step.scenario.private_key)
 
 
 @step(u'When the client makes a request to the server at "([^"]*)" with no signature')
@@ -25,7 +22,7 @@ def make_request(step, url_path):
     step.scenario.response = client.get(url_path)
 
 
-@step(u'When the client makes a request to the server at "([^"]*)" with an invalid signature')
+@step(u'When the client makes a request to the server at "([^"]*)" with an invalid signature')  # noqa F811
 def make_request(step, url_path):
     client = Client()
     factory = SignedRequestFactory('GET', step.scenario.client_id, step.scenario.private_key, {})
@@ -33,7 +30,7 @@ def make_request(step, url_path):
     step.scenario.response = client.get(url + "invalidating=thesignature")
 
 
-@step(u'When the client makes a request to the server at "([^"]*)" with the correct signature')
+@step(u'When the client makes a request to the server at "([^"]*)" with the correct signature')  # noqa F811
 def make_request(step, url_path):
     client = Client()
 
@@ -42,7 +39,9 @@ def make_request(step, url_path):
     step.scenario.response = client.get(url)
 
 
-@step(u'When the client posts a request to the server at "([^"]*)" with the correct signature and the following data:')
+@step(  # noqa F811
+    u'When the client posts a request to the server at "([^"]*)" with the correct signature and the following data:'
+)
 def make_request(step, url_path):
     data = step.hashes[0]
     client = Client()
@@ -51,7 +50,7 @@ def make_request(step, url_path):
     step.scenario.response = client.post(url, data)
 
 
-@step(u'When the client posts a request to the server at "([^"]*)" with the correct signature and no data')
+@step(u'When the client posts a request to the server at "([^"]*)" with the correct signature and no data')  # noqa F811
 def make_request(step, url_path):
     data = {}
     client = Client()
