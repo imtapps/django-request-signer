@@ -10,7 +10,8 @@ class DjangoClientTests(test.TestCase):
 
     def setUp(self):
         self.django_backend_patch = mock.patch(
-            'request_signer.client.generic.django_backend.DjangoSettingsApiCredentialsBackend')
+            'request_signer.client.generic.django_backend.DjangoSettingsApiCredentialsBackend'
+        )
         self.django_backend = self.django_backend_patch.start()
 
     def tearDown(self):

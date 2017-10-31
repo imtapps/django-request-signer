@@ -46,8 +46,10 @@ class SignedRequestTests(test.TestCase):
         self.assertEqual(400, response.status_code)
 
     def test_returns_400_when_signature_doesnt_match(self):
-        response = self.client.get('/test/?{}=apps-testclient&{}=anythingherethatiswrong'.format(
-            constants.CLIENT_ID_PARAM_NAME, constants.SIGNATURE_PARAM_NAME)
+        response = self.client.get(
+            '/test/?{}=apps-testclient&{}=anythingherethatiswrong'.format(
+                constants.CLIENT_ID_PARAM_NAME, constants.SIGNATURE_PARAM_NAME
+            )
         )
         self.assertEqual(400, response.status_code)
 
@@ -85,10 +87,12 @@ class SignedRequestTests(test.TestCase):
         get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
-        request = self.get_request(data={
-            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
-            constants.CLIENT_ID_PARAM_NAME: client.client_id,
-        })
+        request = self.get_request(
+            data={
+                constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+                constants.CLIENT_ID_PARAM_NAME: client.client_id,
+            }
+        )
 
         instance = SignatureValidator(request)
         with mock.patch('request_signer.decorators.get_validator', mock.Mock(return_value=instance)):
@@ -103,10 +107,12 @@ class SignedRequestTests(test.TestCase):
         get_signature.return_value = '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI='
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
-        request = self.get_request(data={
-            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
-            constants.CLIENT_ID_PARAM_NAME: client.client_id,
-        })
+        request = self.get_request(
+            data={
+                constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+                constants.CLIENT_ID_PARAM_NAME: client.client_id,
+            }
+        )
         instance = SignatureValidator(request)
         with mock.patch('request_signer.decorators.get_validator', mock.Mock(return_value=instance)):
             self.assertTrue(has_valid_signature(request))
@@ -114,8 +120,10 @@ class SignedRequestTests(test.TestCase):
 
     @mock.patch('request_signer.signals.successful_signed_request.send')
     def test_does_not_fire_successful_signal_from_signature_required_when_invalid(self, send_signal):
-        response = self.client.get('/test/?{}=apps-testclient&{}=anythingherethatiswrong'.format(
-            constants.CLIENT_ID_PARAM_NAME, constants.SIGNATURE_PARAM_NAME)
+        response = self.client.get(
+            '/test/?{}=apps-testclient&{}=anythingherethatiswrong'.format(
+                constants.CLIENT_ID_PARAM_NAME, constants.SIGNATURE_PARAM_NAME
+            )
         )
         self.assertEqual(400, response.status_code)
         self.assertFalse(send_signal.called)
@@ -126,10 +134,12 @@ class SignedRequestTests(test.TestCase):
         get_signature.return_value = 'ABCDEFGHIJKLMNOPQRSTUVWXYZFtYkCdi4XAc-vOLtI='
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
-        request = self.get_request(data={
-            constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
-            constants.CLIENT_ID_PARAM_NAME: client.client_id,
-        })
+        request = self.get_request(
+            data={
+                constants.SIGNATURE_PARAM_NAME: '4ZAQJqmWE_C9ozPkpJ3Owh0Z_DFtYkCdi4XAc-vOLtI=',
+                constants.CLIENT_ID_PARAM_NAME: client.client_id,
+            }
+        )
         self.assertFalse(has_valid_signature(request))
         self.assertFalse(send_signal.called)
 
@@ -153,9 +163,14 @@ class SignedRequestTests(test.TestCase):
         get_signature.return_value = signature
 
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
-        request = test.client.RequestFactory().get("/my/path/?{}={}&{}={}".format(
-            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
-        ))
+        request = test.client.RequestFactory().get(
+            "/my/path/?{}={}&{}={}".format(
+                constants.CLIENT_ID_PARAM_NAME,
+                client.client_id,
+                constants.SIGNATURE_PARAM_NAME,
+                signature,
+            )
+        )
 
         if 'CONTENT_TYPE' in request.META:
             del request.META['CONTENT_TYPE']
@@ -171,7 +186,10 @@ class SignedRequestTests(test.TestCase):
         signature = 'QEw8WN5YzbWlct5ZXH3GIumeiL8m4NErPtXOz_jWexc='
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
         url = "/my/path/?{}={}&{}={}".format(
-            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
+            constants.CLIENT_ID_PARAM_NAME,
+            client.client_id,
+            constants.SIGNATURE_PARAM_NAME,
+            signature,
         )
         data = {'our': 'data', 'goes': 'here'}
         json_string = json.dumps(data)
@@ -200,16 +218,17 @@ class SignedRequestTests(test.TestCase):
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
 
         url = "/my/path/?{}={}&{}={}".format(
-            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
+            constants.CLIENT_ID_PARAM_NAME,
+            client.client_id,
+            constants.SIGNATURE_PARAM_NAME,
+            signature,
         )
 
         request = test.client.RequestFactory().post(url, data={'username': 'tester'})
         signed_view = signature_required(self.view)
         signed_view(request)
         get_signature.assert_called_once_with(
-            client.private_key,
-            '/my/path/?__client_id=apps-testclient',
-            dict(request.POST)
+            client.private_key, '/my/path/?__client_id=apps-testclient', dict(request.POST)
         )
 
     def test_post_data_payload_is_valid(self):
@@ -217,10 +236,7 @@ class SignedRequestTests(test.TestCase):
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
         url = '/test/?{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
         signature = get_signature(client.private_key, url, payload=data)
-        response = self.client.post(
-            '{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature),
-            data=data
-        )
+        response = self.client.post('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature), data=data)
         self.assertEqual(200, response.status_code)
 
     @mock.patch('apysigner.get_signature')
@@ -231,11 +247,13 @@ class SignedRequestTests(test.TestCase):
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
 
         url = "/my/path/?{}={}&{}={}".format(
-            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
+            constants.CLIENT_ID_PARAM_NAME,
+            client.client_id,
+            constants.SIGNATURE_PARAM_NAME,
+            signature,
         )
 
-        request = test.client.RequestFactory().post(url, data={
-            'usernames': ['t1', 't2', 't3']})
+        request = test.client.RequestFactory().post(url, data={'usernames': ['t1', 't2', 't3']})
         signed_view = signature_required(self.view)
         signed_view(request)
 
@@ -249,10 +267,7 @@ class SignedRequestTests(test.TestCase):
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
         url = '/test/?{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
         signature = get_signature(client.private_key, url, payload=data)
-        response = self.client.post(
-            '{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature),
-            data=data
-        )
+        response = self.client.post('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature), data=data)
         self.assertEqual(200, response.status_code)
 
     def test_signed_views_are_csrf_exempt(self):
@@ -261,15 +276,20 @@ class SignedRequestTests(test.TestCase):
 
     @override_settings(ALLOW_UNSIGNED_REQUESTS=True)
     def test_returns_200_when_signature_doesnt_match_but_allow_unsigned_is_true(self):
-        response = self.client.get('/test/?{}=apps-testclient&{}=anythingherethatiswrong'.format(
-            constants.CLIENT_ID_PARAM_NAME, constants.SIGNATURE_PARAM_NAME)
+        response = self.client.get(
+            '/test/?{}=apps-testclient&{}=anythingherethatiswrong'.format(
+                constants.CLIENT_ID_PARAM_NAME, constants.SIGNATURE_PARAM_NAME
+            )
         )
         self.assertEqual(200, response.status_code)
 
     def test_put_requests_still_use_request_body(self):
         url = '/asdf/'
-        request = test.client.RequestFactory().post(url, data={
-            'usernames': ['t1', 't2', 't3']}, **{'REQUEST_METHOD': "PUT"})
+        request = test.client.RequestFactory().post(
+            url, data={'usernames': ['t1', 't2', 't3']}, **{
+                'REQUEST_METHOD': "PUT"
+            }
+        )
         request_without_data = test.client.RequestFactory().post(url, data={}, **{'REQUEST_METHOD': "PUT"})
         validator1 = SignatureValidator(request)
         validator2 = SignatureValidator(request_without_data)
@@ -289,8 +309,11 @@ class SignedRequestTests(test.TestCase):
 
     def test_patch_requests_still_use_request_body(self):
         url = '/asdf/'
-        request = test.client.RequestFactory().post(url, data={
-            'usernames': ['t1', 't2', 't3']}, **{'REQUEST_METHOD': "PATCH"})
+        request = test.client.RequestFactory().post(
+            url, data={'usernames': ['t1', 't2', 't3']}, **{
+                'REQUEST_METHOD': "PATCH"
+            }
+        )
         request_without_data = test.client.RequestFactory().post(url, data={}, **{'REQUEST_METHOD': "PATCH"})
         validator1 = SignatureValidator(request)
         validator2 = SignatureValidator(request_without_data)
@@ -309,14 +332,19 @@ class SignedRequestTests(test.TestCase):
         self.assertEqual(200, response.status_code)
 
     def test_patch_requests_return_dict_of_multipart_form_data(self):
-        request = test.client.RequestFactory().post('/asdf/', data={
-            'usernames': ['t1', 't2', 't3']}, **{'REQUEST_METHOD': "PATCH"})
+        request = test.client.RequestFactory().post(
+            '/asdf/', data={'usernames': ['t1', 't2', 't3']}, **{
+                'REQUEST_METHOD': "PATCH"
+            }
+        )
         expected = {
             u'--BoUnDaRyStRiNg\r\nContent-Disposition: form-data': [u''],
             u' name': [
                 u'"usernames"\r\n\r\nt1\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
                 u'"usernames"\r\n\r\nt2\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
-                u'"usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n']}
+                u'"usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n'
+            ]
+        }
         self.assertEqual(expected, SignatureValidator(request).request_data)
 
     @mock.patch('apysigner.get_signature')
@@ -324,7 +352,10 @@ class SignedRequestTests(test.TestCase):
         signature = 'QEw8WN5YzbWlct5ZXH3GIumeiL8m4NErPtXOz_jWexc='
         client = models.AuthorizedClient.objects.create(client_id='apps-testclient')
         url = "/my/path/?{}={}&{}={}".format(
-            constants.CLIENT_ID_PARAM_NAME, client.client_id, constants.SIGNATURE_PARAM_NAME, signature,
+            constants.CLIENT_ID_PARAM_NAME,
+            client.client_id,
+            constants.SIGNATURE_PARAM_NAME,
+            signature,
         )
         data = {'our': 'data', 'goes': 'here'}
         json_string = json.dumps(data)

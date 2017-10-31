@@ -186,6 +186,7 @@ class BaseDjangoRestClientInitTests(test.TestCase):
     @override_settings(TEST_CLIENT_ID='my_client_id')
     @override_settings(TEST_PRIVATE_KEY='my_private_key')
     def test_uses_django_settings_by_default_for_api_credentials(self):
+
         class SomeClient(BaseDjangoRestClient):
             domain_settings_name = 'TEST_DOMAIN'
             client_id_settings_name = 'TEST_CLIENT_ID'
@@ -198,6 +199,7 @@ class BaseDjangoRestClientInitTests(test.TestCase):
         self.assertEqual('my_private_key', rest_client._private_key)
 
     def test_will_use_provided_settings_when_available(self):
+
         class SomeProvider(object):
             base_url = "my_domain"
             client_id = "my_client_id"

@@ -13,10 +13,7 @@ def set_client_id(step, client_id, private_key):
 
 @step(u'And that client is registered with the server')
 def register_client(step):
-    AuthorizedClient.objects.create(
-        client_id=step.scenario.client_id,
-        private_key=step.scenario.private_key
-    )
+    AuthorizedClient.objects.create(client_id=step.scenario.client_id, private_key=step.scenario.private_key)
 
 
 @step(u'When the client makes a request to the server at "([^"]*)" with no signature')
@@ -42,7 +39,9 @@ def make_request(step, url_path):
     step.scenario.response = client.get(url)
 
 
-@step(u'When the client posts a request to the server at "([^"]*)" with the correct signature and the following data:')  # noqa F811
+@step(  # noqa F811
+    u'When the client posts a request to the server at "([^"]*)" with the correct signature and the following data:'
+)
 def make_request(step, url_path):
     data = step.hashes[0]
     client = Client()

@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 
-
 setup(
     name='django-request-signer',
     version='4.0.0',
@@ -10,7 +9,6 @@ setup(
     long_description=open('README.rst', 'r').read(),
     install_requires=open('requirements/dist.txt').read().split("\n"),
     packages=find_packages(exclude=("example", "server")),
-
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

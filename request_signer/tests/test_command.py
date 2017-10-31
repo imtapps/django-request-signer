@@ -1,4 +1,3 @@
-
 import mock
 
 from django import test
