@@ -1,5 +1,4 @@
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
@@ -12,9 +11,7 @@ DATABASES = {
     }
 }
 
-TIME_ZONE = 'America/Chicago'
 LANGUAGE_CODE = 'en-us'
-SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
 MEDIA_ROOT = ''
@@ -28,11 +25,6 @@ STATICFILES_FINDERS = (
 )
 
 SECRET_KEY = '2r)nm_tu!92pjipn=khz*a@ofjnnyt+-f)=$e5jrm0jb#c3*to'
-
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -50,7 +42,6 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
@@ -73,3 +64,21 @@ LOGGING = {
         },
     }
 }
+
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [],
+    'APP_DIRS': False,
+    'OPTIONS': {
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+        ],
+        'loaders': [
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        ],
+    },
+}]

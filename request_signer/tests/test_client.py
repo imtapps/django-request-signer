@@ -17,7 +17,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from request_signer import constants
-from request_signer import models
 from request_signer.client.generic import Client, Response, Request, django_backend
 
 
@@ -182,27 +181,3 @@ class ClientTests(TestCase):
         error_as_response = self.get_response()
         self.assertIsInstance(error_as_response, Response)
         self.assertEqual(expected, error_as_response.raw_response)
-
-
-class ClientBackendTests(TestCase):
-
-    def test_uses_api_credentials_from_authorized_service_provider_model(self):
-        prov = models.AuthorizedServiceProvider(base_url="my_url", client_id="my_id", private_key="my_key")
-        client = Client(api_credentials=prov)
-
-        self.assertEqual(prov.base_url, client._base_url)
-        self.assertEqual(prov.client_id, client._client_id)
-        self.assertEqual(prov.private_key, client._private_key)
-
-    def test_uses_api_credentials_from_object_that_implements_api_credential_attributes(self):
-
-        class X(object):
-            base_url = "my_url"
-            client_id = "my_id"
-            private_key = "my_key"
-
-        client = Client(api_credentials=X)
-
-        self.assertEqual(X.base_url, client._base_url)
-        self.assertEqual(X.client_id, client._client_id)
-        self.assertEqual(X.private_key, client._private_key)
