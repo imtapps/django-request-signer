@@ -55,7 +55,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_nose',
-    'server',
 ) + PROJECT_APPS
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
