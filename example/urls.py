@@ -4,7 +4,6 @@ from django import http
 
 from request_signer.decorators import signature_required
 
-
 admin.autodiscover()
 
 urlpatterns = [

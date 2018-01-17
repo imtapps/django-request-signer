@@ -18,7 +18,6 @@ from request_signer import constants
 from request_signer.validator import SignatureValidator
 from request_signer.decorators import signature_required, has_valid_signature
 
-
 TEST_PRIVATE_KEY = 'abc123=='
 
 
