@@ -1,4 +1,6 @@
 import six
+from collections import namedtuple
+from django.conf import settings
 from django.http import QueryDict
 from django.utils.functional import cached_property
 from generic_request_signer.check_signature import check_signature
@@ -56,7 +58,9 @@ class SignatureValidator(object):
     def client(self):
         if not self.signature or not self.client_id:
             return False
-
+        if getattr(settings, 'API_KEYS', None):
+            Client = namedtuple('client', ['private_key'])
+            return Client(settings.API_KEYS.get(self.client_id, ''))
         return models.AuthorizedClient.get_by_client(self.client_id)
 
     @property

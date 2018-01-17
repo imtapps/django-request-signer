@@ -407,3 +407,21 @@ class SignedRequestTests(test.TestCase):
         with self.assertNumQueries(1):
             response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
             self.assertEqual(200, response.status_code)
+
+    @override_settings(API_KEYS={'apps-testclient': 'abc123=='})
+    def test_returns_200_when_using_api_keys(self):
+        url = '/test/?username=test&{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+        signature = get_signature('abc123==', url)
+        response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
+        self.assertEqual(200, response.status_code)
+
+    @override_settings(API_KEYS={'apps-testclient': '123=='})
+    def test_returns_400_when_using_api_keys_that_do_not_match(self):
+        url = '/test/?username=test&{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+        signature = get_signature('abc123==', url)
+        response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
+        self.assertEqual(400, response.status_code)
+        url = '/test/?username=test&{}=app-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+        signature = get_signature('123==', url)
+        response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
+        self.assertEqual(400, response.status_code)
