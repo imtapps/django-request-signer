@@ -2,6 +2,7 @@ import six
 from collections import namedtuple
 from django.conf import settings
 from django.http import QueryDict
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
 from generic_request_signer.check_signature import check_signature
 
@@ -12,10 +13,6 @@ if six.PY3:
     from urllib.parse import unquote
 else:
     from urllib import unquote
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 class SignatureValidator(object):
@@ -65,8 +62,7 @@ class SignatureValidator(object):
         if getattr(settings, 'API_KEYS', None):
             Client = namedtuple('client', ['private_key'])
             return Client(settings.API_KEYS.get(self.client_id, ''))
-        logger.error('API_KEYS not found in settings')
-        return False
+        raise ImproperlyConfigured('API_KEYS not found in settings')
 
     @property
     def request_data(self):

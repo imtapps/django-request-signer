@@ -11,7 +11,7 @@ else:
 from django import test
 from django import http
 from django.test.utils import override_settings
-
+from django.core.exceptions import ImproperlyConfigured
 from apysigner import get_signature
 
 from request_signer import constants
@@ -396,11 +396,7 @@ class SignedRequestTests(test.TestCase):
 class NoSettingsClass(test.TestCase):
 
     def test_request_fails_without_correct_settings(self):
-        url = '/test/?username=test&{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
-        signature = get_signature('abc123==', url)
-        response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
-        self.assertEqual(400, response.status_code)
-        url = '/test/?username=test&{}=app-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
-        signature = get_signature('123==', url)
-        response = self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
-        self.assertEqual(400, response.status_code)
+        with self.assertRaises(ImproperlyConfigured):
+            url = '/test/?username=test&{}=apps-testclient'.format(constants.CLIENT_ID_PARAM_NAME)
+            signature = get_signature('abc123==', url)
+            self.client.get('{}&{}={}'.format(url, constants.SIGNATURE_PARAM_NAME, signature))
