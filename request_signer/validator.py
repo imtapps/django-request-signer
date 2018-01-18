@@ -1,9 +1,12 @@
 import six
+from collections import namedtuple
+from django.conf import settings
 from django.http import QueryDict
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
 from generic_request_signer.check_signature import check_signature
 
-from request_signer import constants, models
+from request_signer import constants
 from request_signer.signals import successful_signed_request
 
 if six.PY3:
@@ -56,8 +59,10 @@ class SignatureValidator(object):
     def client(self):
         if not self.signature or not self.client_id:
             return False
-
-        return models.AuthorizedClient.get_by_client(self.client_id)
+        if getattr(settings, 'API_KEYS', None):
+            Client = namedtuple('client', ['private_key'])
+            return Client(settings.API_KEYS.get(self.client_id, ''))
+        raise ImproperlyConfigured('API_KEYS not found in settings')
 
     @property
     def request_data(self):
