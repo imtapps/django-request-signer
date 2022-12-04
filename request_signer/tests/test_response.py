@@ -2,11 +2,13 @@ import six
 if six.PY3:
     from unittest import mock
     from io import StringIO
+    from http.client import responses
 else:
     import mock
     from cStringIO import StringIO
+    from httplib import responses
 
-from http.client import responses
+
 import json
 from django import test
 from request_signer.client.generic import Response
