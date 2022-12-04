@@ -1,5 +1,7 @@
 import json
 import re
+
+import django
 import six
 
 if six.PY3:
@@ -310,14 +312,24 @@ class SignedRequestTests(test.TestCase):
                 'REQUEST_METHOD': "PATCH"
             }
         )
-        expected = {
-            u'--BoUnDaRyStRiNg\r\nContent-Disposition: form-data': [u''],
-            u' name': [
-                u'"usernames"\r\n\r\nt1\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
-                u'"usernames"\r\n\r\nt2\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
-                u'"usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n'
-            ]
-        }
+
+        if django.get_version() >= "3.2":
+            expected = {
+                '--BoUnDaRyStRiNg\r\nContent-Disposition: form-data; name': [
+                    '"usernames"\r\n\r\nt1\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data; '
+                    'name="usernames"\r\n\r\nt2\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data; '
+                    'name="usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n'
+                ]}
+        else:
+            expected = {
+                u'--BoUnDaRyStRiNg\r\nContent-Disposition: form-data': [u''],
+                u' name': [
+                    u'"usernames"\r\n\r\nt1\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
+                    u'"usernames"\r\n\r\nt2\r\n--BoUnDaRyStRiNg\r\nContent-Disposition: form-data',
+                    u'"usernames"\r\n\r\nt3\r\n--BoUnDaRyStRiNg--\r\n'
+                ]
+            }
+
         self.assertEqual(expected, SignatureValidator(request).request_data)
 
     @mock.patch('apysigner.get_signature')
