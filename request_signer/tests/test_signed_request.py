@@ -1,12 +1,13 @@
 import json
-import mock
 import re
 import six
 
 if six.PY3:
     from urllib.parse import unquote
+    from unittest import mock
 else:
     from urllib import unquote
+    import mock
 
 from django import test
 from django import http

@@ -1,4 +1,6 @@
-django>1.7,<2.0
-apysigner>3.0,<4.0
-generic-request-signer>1.0,<2.0
-six>=1.10.0,<2
+--extra-index-url https://elasticpypi:f7f2f829-7740-49b1-be32-672b5f70b766@y1jql26uj9.execute-api.us-west-2.amazonaws.com/staging/simple/
+
+six>=1.10.0,<2; python_version < '3.0'
+
+django>=1.11,<4.2
+generic-request-signer>=2.0,<2.1

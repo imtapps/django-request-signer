@@ -1,0 +1,8 @@
+-r dist.txt
+
+mock>=1.0.1,<2; python_version < '3.0'
+flake8==3.9.2; python_version < '3.0'
+coverage>=4.0.1,<5; python_version < '3.0'
+
+flake8==5.0.4; python_version > '3.0'
+coverage==6.2; python_version > '3.0'

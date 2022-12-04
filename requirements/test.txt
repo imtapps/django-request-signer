@@ -1,6 +1,0 @@
--r dist.txt
-mock>=1.0.1,<2
-django-nose>=1.4.3,<2
-nosexcover>=1.0.10,<2
-coverage>=4.0.1,<5
-flake8>=2.5.2,<3
