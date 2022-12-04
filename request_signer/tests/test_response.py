@@ -32,11 +32,15 @@ class ResponseTests(test.TestCase):
         evaluate_response.assert_called_once_with(self.response.status_code)
 
     def test_bad_http_status_return_false_from_evaluate_response_code_for_success(self):
-        include_status = lambda status: status < 200 or status > 299
+        def include_status(status):
+            return status < 200 or status > 299
+
         self.evaluate_response_code_for_success(False, include_status)
 
     def test_good_http_status_return_true_from_evaluate_response_code_for_success(self):
-        include_status = lambda status: 199 < status < 300
+        def include_status(status):
+            return 199 < status < 300
+
         self.evaluate_response_code_for_success(True, include_status)
 
     def evaluate_response_code_for_success(self, expected, include_status):
