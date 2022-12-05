@@ -1,7 +1,0 @@
--r dist.txt
-mock
-django-nose
-nosexcover
-coverage
-lettuce
-flake8

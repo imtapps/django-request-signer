@@ -2,26 +2,23 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import request_signer.models
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
             name='AuthorizedClient',
             fields=[
                 ('client_id', models.CharField(max_length=20, serialize=False, primary_key=True)),
-                ('private_key', models.CharField(default=request_signer.models.create_private_key, max_length=100)),
+                ('private_key', models.CharField(default='', max_length=100)),
                 ('is_active', models.BooleanField(default=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
-            options={
-            },
-            bases=(models.Model,),
+            options={},
+            bases=(models.Model, ),
         ),
     ]

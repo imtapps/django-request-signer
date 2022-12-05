@@ -1,8 +1,8 @@
-from django.utils import unittest
+from django import test
 from request_signer.client.generic import Request, HttpMethodNotAllowed
 
 
-class RequestTests(unittest.TestCase):
+class RequestTests(test.TestCase):
 
     def get_request(self, http_method, url="http://some.domain.com"):
         return Request(http_method, url, None)

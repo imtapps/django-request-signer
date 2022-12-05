@@ -14,6 +14,7 @@ def monkey_patch_for_multi_threaded():
     OriginalHTTPServer = HTTPServer
 
     class ThreadedHTTPServer(ThreadingMixIn, OriginalHTTPServer):
+
         def __init__(self, server_address, RequestHandlerClass=None):
             OriginalHTTPServer.__init__(self, server_address, RequestHandlerClass)
 

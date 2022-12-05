@@ -1,16 +1,23 @@
-import mock
-from django.utils import unittest
+import six
+
+if six.PY3:
+    from unittest import mock
+else:
+    import mock
+
+from django import test
 from request_signer.client.generic import Client
 from request_signer.client.generic.django_client import DjangoClient
 
 
-class DjangoClientTests(unittest.TestCase):
+class DjangoClientTests(test.TestCase):
 
     sut_class = DjangoClient
 
     def setUp(self):
         self.django_backend_patch = mock.patch(
-            'request_signer.client.generic.django_backend.DjangoSettingsApiCredentialsBackend')
+            'request_signer.client.generic.django_backend.DjangoSettingsApiCredentialsBackend'
+        )
         self.django_backend = self.django_backend_patch.start()
 
     def tearDown(self):

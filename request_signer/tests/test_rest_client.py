@@ -1,7 +1,8 @@
+
 import six
 
 if six.PY3:
-    from django.test import mock
+    from unittest import mock
 else:
     import mock
 
@@ -65,7 +66,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.get_list("1234")
-        self.assertEqual(str(response.read.return_value), str(e.exception))
+        self.assertEqual(str(response.read.return_value), str(e.exception.message))
 
     def test_get_item_issues_get_json_response_for_endpoint(self):
         with mock.patch.object(self.sut, "_get_json_response") as get_response:
@@ -95,7 +96,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.get_item("1234", "pk-3")
-        self.assertEqual(str(response.read.return_value), str(e.exception))
+        self.assertEqual(str(response.read.return_value), str(e.exception.message))
 
     def test_create_issues_get_json_response_for_endpoint(self):
         data = {'some_data': 'to send'}
@@ -120,7 +121,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.create("1234", **data)
-        self.assertEqual(str(response.read.return_value), str(e.exception))
+        self.assertEqual(str(response.read.return_value), str(e.exception.message))
 
     def test_update_issues_get_json_response_for_endpoint(self):
         data = {'some_data': 'to send'}
@@ -147,7 +148,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.update("1234", "pk-3", **data)
-        self.assertEqual(str(response.read.return_value), str(e.exception))
+        self.assertEqual(str(response.read.return_value), str(e.exception.message))
 
     def test_delete_issues_get_json_response_for_endpoint(self):
         with mock.patch.object(self.sut, "_get_json_response") as get_response:
@@ -177,7 +178,7 @@ class BaseDjangoRestClientTests(test.TestCase):
             get_response.return_value = response
             with self.assertRaises(WebException) as e:
                 self.sut.delete("1234", "pk-3")
-        self.assertEqual(str(response.read.return_value), str(e.exception))
+        self.assertEqual(str(response.read.return_value), str(e.exception.message))
 
 
 class BaseDjangoRestClientInitTests(test.TestCase):
@@ -186,6 +187,7 @@ class BaseDjangoRestClientInitTests(test.TestCase):
     @override_settings(TEST_CLIENT_ID='my_client_id')
     @override_settings(TEST_PRIVATE_KEY='my_private_key')
     def test_uses_django_settings_by_default_for_api_credentials(self):
+
         class SomeClient(BaseDjangoRestClient):
             domain_settings_name = 'TEST_DOMAIN'
             client_id_settings_name = 'TEST_CLIENT_ID'
@@ -198,6 +200,7 @@ class BaseDjangoRestClientInitTests(test.TestCase):
         self.assertEqual('my_private_key', rest_client._private_key)
 
     def test_will_use_provided_settings_when_available(self):
+
         class SomeProvider(object):
             base_url = "my_domain"
             client_id = "my_client_id"

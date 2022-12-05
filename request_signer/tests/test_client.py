@@ -17,7 +17,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from request_signer import constants
-from request_signer import models
 from request_signer.client.generic import Client, Response, Request, django_backend
 
 
@@ -98,12 +97,10 @@ class ClientTests(TestCase):
             self.get_response(method, self.endpoint, data, **request_kwargs)
 
         request.assert_called_once_with(
-            method,
-            'http://my_url?{0}={1}&right=here&some=data&this=is&{2}={3}'.format(
-                constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, '5oRsP9rQ-qozJlwlrV2DrC3JJitT4J8zXsuucnN6Ogg='),
-            None,
-            **request_kwargs
+            method, 'http://my_url?{0}={1}&right=here&some=data&this=is&{2}={3}'.format(
+                constants.CLIENT_ID_PARAM_NAME, self.client._client_id, constants.SIGNATURE_PARAM_NAME,
+                '5oRsP9rQ-qozJlwlrV2DrC3JJitT4J8zXsuucnN6Ogg='
+            ), None, **request_kwargs
         )
 
     @mock.patch('generic_request_signer.request.Request')
@@ -116,12 +113,10 @@ class ClientTests(TestCase):
             self.get_response(method, self.endpoint, json.dumps(data, sort_keys=True), **request_kwargs)
 
         request.assert_called_once_with(
-            method,
-            'http://my_url?{0}={1}&{2}={3}'.format(
-                constants.CLIENT_ID_PARAM_NAME, self.client._client_id,
-                constants.SIGNATURE_PARAM_NAME, 'GQuoMFCNPBPoG736rfILRebBvlcnaj72LJU4cVSxqQo='),
-            json.dumps(data, sort_keys=True).encode('utf8'),
-            **request_kwargs
+            method, 'http://my_url?{0}={1}&{2}={3}'.format(
+                constants.CLIENT_ID_PARAM_NAME, self.client._client_id, constants.SIGNATURE_PARAM_NAME,
+                'GQuoMFCNPBPoG736rfILRebBvlcnaj72LJU4cVSxqQo='
+            ), json.dumps(data, sort_keys=True).encode('utf8'), **request_kwargs
         )
 
     def test_get_response_gets_url_with_endpoint(self):
@@ -186,26 +181,3 @@ class ClientTests(TestCase):
         error_as_response = self.get_response()
         self.assertIsInstance(error_as_response, Response)
         self.assertEqual(expected, error_as_response.raw_response)
-
-
-class ClientBackendTests(TestCase):
-
-    def test_uses_api_credentials_from_authorized_service_provider_model(self):
-        prov = models.AuthorizedServiceProvider(base_url="my_url", client_id="my_id", private_key="my_key")
-        client = Client(api_credentials=prov)
-
-        self.assertEqual(prov.base_url, client._base_url)
-        self.assertEqual(prov.client_id, client._client_id)
-        self.assertEqual(prov.private_key, client._private_key)
-
-    def test_uses_api_credentials_from_object_that_implements_api_credential_attributes(self):
-        class X(object):
-            base_url = "my_url"
-            client_id = "my_id"
-            private_key = "my_key"
-
-        client = Client(api_credentials=X)
-
-        self.assertEqual(X.base_url, client._base_url)
-        self.assertEqual(X.client_id, client._client_id)
-        self.assertEqual(X.private_key, client._private_key)
