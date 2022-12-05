@@ -1,4 +1,10 @@
-import mock
+import six
+
+if six.PY3:
+    from unittest import mock
+else:
+    import mock
+
 from django import test
 from request_signer.client.generic import Client
 from request_signer.client.generic.django_client import DjangoClient

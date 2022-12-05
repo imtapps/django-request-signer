@@ -1,7 +1,8 @@
+
 import six
 
 if six.PY3:
-    from django.test import mock
+    from unittest import mock
 else:
     import mock
 
